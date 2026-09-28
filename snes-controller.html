@@ -625,8 +625,8 @@
 
     <!-- Top Edge Shoulder Triggers -->
     <div class="shoulder-bar">
-      <div class="shoulder-trigger" data-btn="L">L: FIERCE</div>
-      <div class="shoulder-trigger" data-btn="R">R: ROUNDHOUSE</div>
+      <div class="shoulder-trigger" id="shoulder-L" data-btn="L">L: AIR BRK</div>
+      <div class="shoulder-trigger" id="shoulder-R" data-btn="R">R: AIR BRK</div>
     </div>
 
     <!-- Top Status Bar -->
@@ -664,7 +664,7 @@
       <!-- Center Zone: Telemetry LCD & System Pills -->
       <div class="center-zone">
         <div class="lcd-hud">
-          <div class="lcd-title">STREET FIGHTER II</div>
+          <div class="lcd-title" id="lcd-title">F-ZERO</div>
           <div id="lcd-room">ROOM: ----</div>
           <div id="lcd-conduit" style="color: #38bdf8;">CONDUIT: WEBRTC</div>
           <div id="lcd-ping">PING: --ms</div>
@@ -686,45 +686,45 @@
       <div class="action-zone">
         <div class="six-button-panel">
           
-          <!-- Punches Row (Top) -->
-          <div class="row-header">
-            <span>PUNCHES: JAB</span>
-            <span>STRONG</span>
-            <span>FIERCE</span>
+          <!-- Top Row -->
+          <div class="row-header" id="row-header-top">
+            <span>BRAKE</span>
+            <span>PIT / MUTE</span>
+            <span>AIR BRK L</span>
           </div>
           <div class="buttons-row">
             <div class="arc-btn-wrap">
               <button class="arc-btn punch-light" data-btn="Y">Y</button>
-              <span class="btn-subtext">LIGHT (JAB)</span>
+              <span class="btn-subtext" id="subtext-Y">BRAKE</span>
             </div>
             <div class="arc-btn-wrap">
               <button class="arc-btn punch-med" data-btn="X">X</button>
-              <span class="btn-subtext">MED (STRONG)</span>
+              <span class="btn-subtext" id="subtext-X">PIT / MUTE</span>
             </div>
             <div class="arc-btn-wrap">
               <button class="arc-btn punch-heavy" data-btn="L">L</button>
-              <span class="btn-subtext">HEAVY (FIERCE)</span>
+              <span class="btn-subtext" id="subtext-L">AIR BRK L</span>
             </div>
           </div>
 
-          <!-- Kicks Row (Bottom) -->
-          <div class="row-header" style="margin-top: 4px;">
-            <span>KICKS: SHORT</span>
-            <span>FORWARD</span>
-            <span>ROUNDHOUSE</span>
+          <!-- Bottom Row -->
+          <div class="row-header" id="row-header-bottom" style="margin-top: 4px;">
+            <span>GAS / ACCEL</span>
+            <span>SUPER JET</span>
+            <span>AIR BRK R</span>
           </div>
           <div class="buttons-row">
             <div class="arc-btn-wrap">
               <button class="arc-btn kick-light" data-btn="B">B</button>
-              <span class="btn-subtext">LIGHT (SHORT)</span>
+              <span class="btn-subtext" id="subtext-B">GAS / ACCEL</span>
             </div>
             <div class="arc-btn-wrap">
               <button class="arc-btn kick-med" data-btn="A">A</button>
-              <span class="btn-subtext">MED (FORWARD)</span>
+              <span class="btn-subtext" id="subtext-A">SUPER JET</span>
             </div>
             <div class="arc-btn-wrap">
               <button class="arc-btn kick-heavy" data-btn="R">R</button>
-              <span class="btn-subtext">HEAVY (RH)</span>
+              <span class="btn-subtext" id="subtext-R">AIR BRK R</span>
             </div>
           </div>
 
@@ -752,9 +752,123 @@
     const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
 
+    // Game Profiles for Dynamic Button Skinning
+    const GAME_PROFILES = {
+      fzero: {
+        title: 'F-ZERO',
+        shoulderL: 'L: AIR BRK',
+        shoulderR: 'R: AIR BRK',
+        topRowHeader: '<span>BRAKE</span><span>PIT / MUTE</span><span>AIR BRK L</span>',
+        subY: 'BRAKE',
+        subX: 'PIT / MUTE',
+        subL: 'AIR BRK L',
+        bottomRowHeader: '<span>GAS / ACCEL</span><span>SUPER JET</span><span>AIR BRK R</span>',
+        subB: 'GAS / ACCEL',
+        subA: 'SUPER JET',
+        subR: 'AIR BRK R'
+      },
+      sf2: {
+        title: 'STREET FIGHTER II',
+        shoulderL: 'L: FIERCE',
+        shoulderR: 'R: ROUNDHOUSE',
+        topRowHeader: '<span>PUNCHES: JAB</span><span>STRONG</span><span>FIERCE</span>',
+        subY: 'LIGHT (JAB)',
+        subX: 'MED (STRONG)',
+        subL: 'HEAVY (FIERCE)',
+        bottomRowHeader: '<span>KICKS: SHORT</span><span>FORWARD</span><span>ROUNDHOUSE</span>',
+        subB: 'LIGHT (SHORT)',
+        subA: 'MED (FORWARD)',
+        subR: 'HEAVY (RH)'
+      },
+      marioworld: {
+        title: 'SUPER MARIO',
+        shoulderL: 'L: SCROLL L',
+        shoulderR: 'R: SCROLL R',
+        topRowHeader: '<span>RUN / TONGUE</span><span>RUN</span><span>SCROLL L</span>',
+        subY: 'RUN / TONGUE',
+        subX: 'RUN',
+        subL: 'SCROLL L',
+        bottomRowHeader: '<span>JUMP</span><span>SPIN JUMP</span><span>SCROLL R</span>',
+        subB: 'JUMP',
+        subA: 'SPIN JUMP',
+        subR: 'SCROLL R'
+      },
+      tmnt: {
+        title: 'TMNT IV',
+        shoulderL: 'L: SPECIAL',
+        shoulderR: 'R: THROW',
+        topRowHeader: '<span>ATTACK</span><span>RUN</span><span>SPECIAL</span>',
+        subY: 'ATTACK',
+        subX: 'RUN',
+        subL: 'SPECIAL',
+        bottomRowHeader: '<span>JUMP</span><span>SPECIAL</span><span>THROW</span>',
+        subB: 'JUMP',
+        subA: 'SPECIAL',
+        subR: 'SCREEN THROW'
+      },
+      zelda: {
+        title: 'ZELDA: ALTTP',
+        shoulderL: 'L: PREV ITEM',
+        shoulderR: 'R: NEXT ITEM',
+        topRowHeader: '<span>ITEM</span><span>MAP</span><span>PREV ITEM</span>',
+        subY: 'USE ITEM',
+        subX: 'WORLD MAP',
+        subL: 'PREV ITEM',
+        bottomRowHeader: '<span>SWORD</span><span>ACTION / DASH</span><span>NEXT ITEM</span>',
+        subB: 'SWORD SLASH',
+        subA: 'ACTION / DASH',
+        subR: 'NEXT ITEM'
+      },
+      chrono: {
+        title: 'CHRONO TRIGGER',
+        shoulderL: 'L: PREV TGT',
+        shoulderR: 'R: NEXT TGT',
+        topRowHeader: '<span>SWITCH</span><span>MENU</span><span>PREV TGT</span>',
+        subY: 'SWITCH HERO',
+        subX: 'CAMP MENU',
+        subL: 'PREV TARGET',
+        bottomRowHeader: '<span>CANCEL / DASH</span><span>CONFIRM / TECH</span><span>NEXT TGT</span>',
+        subB: 'CANCEL / DASH',
+        subA: 'CONFIRM / TECH',
+        subR: 'NEXT TARGET'
+      }
+    };
+
+    function applyGameProfile(gameId) {
+      const p = GAME_PROFILES[gameId] || GAME_PROFILES.fzero;
+      const titleEl = document.getElementById('lcd-title');
+      if (titleEl) titleEl.textContent = p.title;
+
+      const shL = document.getElementById('shoulder-L');
+      if (shL) shL.textContent = p.shoulderL;
+      const shR = document.getElementById('shoulder-R');
+      if (shR) shR.textContent = p.shoulderR;
+
+      const topH = document.getElementById('row-header-top');
+      if (topH) topH.innerHTML = p.topRowHeader;
+      const botH = document.getElementById('row-header-bottom');
+      if (botH) botH.innerHTML = p.bottomRowHeader;
+
+      const subY = document.getElementById('subtext-Y');
+      if (subY) subY.textContent = p.subY;
+      const subX = document.getElementById('subtext-X');
+      if (subX) subX.textContent = p.subX;
+      const subL = document.getElementById('subtext-L');
+      if (subL) subL.textContent = p.subL;
+
+      const subB = document.getElementById('subtext-B');
+      if (subB) subB.textContent = p.subB;
+      const subA = document.getElementById('subtext-A');
+      if (subA) subA.textContent = p.subA;
+      const subR = document.getElementById('subtext-R');
+      if (subR) subR.textContent = p.subR;
+    }
+
     function parseRoom() {
       const params = new URLSearchParams(window.location.search);
       const r = params.get('room');
+      const g = params.get('game') || 'fzero';
+      applyGameProfile(g);
       if (r && r.trim().length > 0) {
         roomCode = r.trim().toUpperCase();
         document.getElementById('lcd-room').textContent = 'ROOM: ' + roomCode;
@@ -839,11 +953,14 @@
       });
 
       conn.on('data', (data) => {
-        if (data && data.type === 'pong') {
+        if (!data) return;
+        if (data.type === 'pong') {
           if (lastPingTime > 0) {
             currentPing = Math.round(Date.now() - lastPingTime);
             document.getElementById('lcd-ping').textContent = 'PING: ' + currentPing + 'ms';
           }
+        } else if (data.type === 'set_game' || data.type === 'handshake') {
+          if (data.game) applyGameProfile(data.game);
         }
       });
 
@@ -866,6 +983,9 @@
                 currentPing = Math.round(Date.now() - lastPingTime);
                 document.getElementById('lcd-ping').textContent = 'PING: ' + currentPing + 'ms';
               }
+            })
+            .on('broadcast', { event: 'set_game' }, ({ payload }) => {
+              if (payload && payload.game) applyGameProfile(payload.game);
             })
             .subscribe((status) => {
               if (status === 'SUBSCRIBED') {
