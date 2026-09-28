@@ -29,114 +29,147 @@
 
   const BUILTIN_ROMS = [
     {
-      id: 'tobu',
-      title: 'Tobu Tobu Girl',
-      file: 'roms/TobuTobuGirl.gb',
-      developer: 'Tangram Games',
-      year: '2016',
-      genre: 'Action / Arcade',
-      description: 'Acclaimed action arcade masterpiece! Bounce on enemies and flap wings to rescue your cat from the stratosphere before time runs out.',
-      color: '#d946ef',
-      icon: '🐱'
+      id: 'tetris',
+      title: 'Tetris (1989)',
+      file: 'roms/Tetris.gb',
+      developer: 'Nintendo',
+      year: '1989',
+      genre: 'Puzzle / All-Time Classic',
+      description: 'The defining pack-in masterpiece that conquered the world. Stack falling tetrominoes, clear lines, and groove to the iconic Korobeiniki Type-A chiptune.',
+      color: '#38bdf8',
+      icon: '🧱'
     },
     {
-      id: 'traumatarium',
-      title: 'Traumatarium',
-      file: 'roms/Traumatarium.gb',
-      developer: 'Horror Rogue',
-      year: '2022',
-      genre: '1st-Person Dungeon RPG',
-      description: 'Atmospheric dark fantasy dungeon delve. Navigate cursed crypts, manage stamina, battle macabre horrors, and discover ancient artifacts.',
+      id: 'supermarioland',
+      title: 'Super Mario Land',
+      file: 'roms/SuperMarioLand.gb',
+      developer: 'Nintendo (Gunpei Yokoi)',
+      year: '1989',
+      genre: 'Action Platformer',
+      description: 'The legendary launch platformer. Guide Mario across Sarasaland to rescue Princess Daisy from Tatanga, piloting submarines and airplanes.',
       color: '#ef4444',
-      icon: '⚔️'
+      icon: '🍄'
     },
     {
-      id: 'jetpak',
-      title: 'Super JetPak DX',
-      file: 'roms/SuperJetPakDX.gbc',
-      developer: 'RetroGB',
-      year: '2020',
-      genre: 'Arcade Platformer (GBC)',
-      description: 'Vibrant Game Boy Color space action! Blast alien waves, recover lost rocket ship parts, and refuel your ship to escape hostile worlds.',
-      color: '#06b6d4',
-      icon: '🚀'
-    },
-    {
-      id: 'wingwarriors',
-      title: 'Wing Warriors',
-      file: 'roms/WingWarriors.gb',
-      developer: 'Retro Shmup',
-      year: '2020',
-      genre: 'Vertical Scrolling Shmup',
-      description: 'High-octane vertical scrolling arcade shooter with blistering dogfights, weapon upgrades, giant bosses, and a stellar chiptune OST.',
-      color: '#3b82f6',
-      icon: '✈️'
-    },
-    {
-      id: 'dangan',
-      title: 'Dangan GB',
-      file: 'roms/DanganGB.gb',
-      developer: 'Snorpung',
-      year: '2019',
-      genre: 'Bullet Hell Action',
-      description: 'Precision arcade shmup engineered for lightning reflexes. Weave between dense projectile patterns and chain combos for high scores.',
+      id: 'supermarioland2',
+      title: 'Super Mario Land 2: 6 Golden Coins',
+      file: 'roms/SuperMarioLand2.gb',
+      developer: 'Nintendo',
+      year: '1992',
+      genre: 'Platformer',
+      description: 'The massive Mario sequel introducing Wario! Explore 6 expansive themed worlds, obtain the Carrot power-up to glide with bunny ears, and reclaim Mario’s castle.',
       color: '#f59e0b',
-      icon: '💥'
+      icon: '⭐'
     },
     {
-      id: 'porklike',
-      title: 'Porklike',
-      file: 'roms/Porklike.gb',
-      developer: 'Krystian Majewski',
-      year: '2021',
-      genre: 'Turn-based Roguelike',
-      description: 'Tactical dungeon crawl through procedural caverns. Manage inventory, avoid deadly traps, fight goblins, and descend deep into the abyss.',
+      id: 'zelda',
+      title: "The Legend of Zelda: Link's Awakening",
+      file: 'roms/ZeldaLinksAwakening.gb',
+      developer: 'Nintendo',
+      year: '1993',
+      genre: 'Action Adventure RPG',
+      description: 'One of the greatest Zelda adventures of all time. Shipwrecked on enigmatic Koholint Island, Link must gather the eight Siren Instruments to awaken the Wind Fish.',
       color: '#10b981',
       icon: '🗡️'
     },
     {
-      id: 'dino',
-      title: "Dino's Offline Adventure",
-      file: 'roms/DinosOfflineAdventure.gb',
-      developer: 'Retro Port',
-      year: '2021',
-      genre: 'Endless Runner',
-      description: 'The beloved Chrome browser dinosaur runner faithfully rebuilt for Game Boy hardware with buttery smooth 60 FPS scrolling and obstacles.',
-      color: '#64748b',
-      icon: '🦖'
+      id: 'pokemonred',
+      title: 'Pokémon Red Version',
+      file: 'roms/PokemonRed.gb',
+      developer: 'Game Freak / Nintendo',
+      year: '1998',
+      genre: 'RPG / Monster Battler',
+      description: 'The global phenomenon. Begin your journey in Pallet Town, choose Charmander, Squirtle, or Bulbasaur, conquer the 8 Gym Leaders, and catch all 151 Pokémon.',
+      color: '#dc2626',
+      icon: '🔴'
     },
     {
-      id: 'flappy',
-      title: 'Flappy Boy',
-      file: 'roms/FlappyBoy.gb',
-      developer: 'Bitnenfer',
-      year: '2019',
-      genre: 'Arcade Tap Flyer',
-      description: 'The addictive one-button flying challenge adapted with authentic DMG physics, fluid animations, and crisp audio cues.',
-      color: '#84cc16',
-      icon: '🪶'
-    },
-    {
-      id: 'snake',
-      title: 'Snake GB',
-      file: 'roms/Snake.gb',
-      developer: 'Homebrew Labs',
-      year: '2020',
-      genre: 'Retro Classic',
-      description: 'The timeless arcade serpent. Guide the snake through mazes, eat glowing apples, grow longer without crashing, and set high-score records.',
-      color: '#22c55e',
-      icon: '🐍'
-    },
-    {
-      id: 'wordle',
-      title: 'Wordle GB',
-      file: 'roms/Wordle.gb',
-      developer: 'Homebrew Assembly',
-      year: '2022',
-      genre: 'Word Puzzle',
-      description: 'The global 5-letter word mystery engineered into authentic Game Boy assembly. Six attempts to deduce the hidden word with instant hints.',
+      id: 'pokemonyellow',
+      title: 'Pokémon Yellow: Pikachu Edition',
+      file: 'roms/PokemonYellow.gb',
+      developer: 'Game Freak / Nintendo',
+      year: '1998',
+      genre: 'RPG / Special Edition',
+      description: 'Anime-faithful edition featuring Pikachu following your footsteps, Jessie & James encounters, and all three Kanto starters obtainable.',
       color: '#eab308',
-      icon: '🔤'
+      icon: '⚡'
+    },
+    {
+      id: 'kirby',
+      title: "Kirby's Dream Land",
+      file: 'roms/KirbysDreamLand.gb',
+      developer: 'HAL Laboratory / Sakurai',
+      year: '1992',
+      genre: 'Action Platformer',
+      description: 'The iconic debut of Kirby! Inhale enemies, puff up to float through Dream Land, defeat Whispy Woods, and recover the stolen food from King Dedede.',
+      color: '#ec4899',
+      icon: '🌟'
+    },
+    {
+      id: 'donkeykong94',
+      title: "Donkey Kong '94",
+      file: 'roms/DonkeyKong94.gb',
+      developer: 'Nintendo',
+      year: '1994',
+      genre: 'Puzzle Platformer',
+      description: 'Universal critical acclaim! Starts like the classic arcade game before expanding into 101 puzzle-platforming stages with backflips and handstands.',
+      color: '#d97706',
+      icon: '🦍'
+    },
+    {
+      id: 'metroid2',
+      title: 'Metroid II: Return of Samus',
+      file: 'roms/Metroid2.gb',
+      developer: 'Nintendo',
+      year: '1991',
+      genre: 'Sci-Fi Action Adventure',
+      description: 'Samus Aran descends into the subterranean depths of planet SR388 to eradicate the Metroid species before Space Pirates weaponize them.',
+      color: '#06b6d4',
+      icon: '🛸'
+    },
+    {
+      id: 'warioland',
+      title: 'Wario Land: Super Mario Land 3',
+      file: 'roms/WarioLand.gb',
+      developer: 'Nintendo',
+      year: '1994',
+      genre: 'Platformer',
+      description: 'Wario’s debut as a protagonist! Body-slam enemies, don the Bull, Jet, and Dragon pots, and loot Kitchen Island for pirate treasure.',
+      color: '#84cc16',
+      icon: '💰'
+    },
+    {
+      id: 'megaman',
+      title: 'Mega Man: Dr. Wily’s Revenge',
+      file: 'roms/MegaMan.gb',
+      developer: 'Capcom',
+      year: '1991',
+      genre: 'Action Run & Gun',
+      description: 'The Blue Bomber’s portable debut. Blast through Cut Man, Elec Man, Ice Man, and Fire Man, steal their powers, and defeat Enker.',
+      color: '#2563eb',
+      icon: '🤖'
+    },
+    {
+      id: 'castlevania2',
+      title: 'Castlevania II: Belmont’s Revenge',
+      file: 'roms/Castlevania2.gb',
+      developer: 'Konami',
+      year: '1991',
+      genre: 'Gothic Action Platformer',
+      description: 'Acclaimed action sequel with legendary chiptunes. Christopher Belmont brandishes the holy whip across 4 castle towers to rescue his son Soleil from Dracula.',
+      color: '#7c3aed',
+      icon: '🏰'
+    },
+    {
+      id: 'pacman',
+      title: 'Pac-Man',
+      file: 'roms/PacMan.gb',
+      developer: 'Namco',
+      year: '1990',
+      genre: 'Arcade Classic',
+      description: 'The authentic portable port of the arcade legend. Chomp power pellets, outwit Inky, Blinky, Pinky, and Clyde, and clear mazes.',
+      color: '#fbbf24',
+      icon: '🟡'
     }
   ];
 
@@ -151,6 +184,7 @@
 
       this.module = null;
       this.e = null; // Emulator instance pointer
+      this.joypadBufferPtr = null;
       this.romDataPtr = null;
       this.romSize = 0;
       this.currentRomInfo = null;
@@ -416,6 +450,10 @@
       this.audioBufferPtr = this.module._get_audio_buffer_ptr(this.e);
       this.audioBufferCap = this.module._get_audio_buffer_capacity(this.e);
 
+      // Hook joypad input buffer
+      this.joypadBufferPtr = this.module._joypad_new();
+      this.module._emulator_set_default_joypad_callback(this.e, this.joypadBufferPtr);
+
       this.setPalette(this.currentPalette);
 
       // Restore saved battery SRAM if available
@@ -475,30 +513,15 @@
     }
 
     runUntil(untilTicks) {
-      const currentTicks = this.module._emulator_get_ticks_f64(this.e);
-      const mod1Sec = currentTicks - Math.floor(currentTicks / CPU_TICKS_PER_SECOND) * CPU_TICKS_PER_SECOND;
-      const next1Sec = Math.ceil(Math.ceil((mod1Sec + 1) / CPU_TICKS_PER_60HZ) * CPU_TICKS_PER_60HZ);
-      let next60hzTicks = currentTicks + (next1Sec - mod1Sec);
-
       while (true) {
-        const event = this.module._emulator_run_until_f64(
-          this.e,
-          Math.min(untilTicks, next60hzTicks)
-        );
+        const event = this.module._emulator_run_until_f64(this.e, untilTicks);
 
         if (event & EVENT_AUDIO_BUFFER_FULL) {
           this.pushAudioBuffer();
         }
 
         if (event & EVENT_UNTIL_TICKS) {
-          const curTicks = this.module._emulator_get_ticks_f64(this.e);
-          if (curTicks >= next60hzTicks) {
-            const m1 = curTicks - Math.floor(curTicks / CPU_TICKS_PER_SECOND) * CPU_TICKS_PER_SECOND;
-            const n1 = Math.ceil(Math.ceil((m1 + 1) / CPU_TICKS_PER_60HZ) * CPU_TICKS_PER_60HZ);
-            next60hzTicks = curTicks + (n1 - m1);
-          } else {
-            break;
-          }
+          break;
         }
       }
 
@@ -588,6 +611,11 @@
         this.saveBatterySram();
         this.module._emulator_delete(this.e);
         this.e = null;
+      }
+
+      if (this.module && this.joypadBufferPtr) {
+        this.module._joypad_delete(this.joypadBufferPtr);
+        this.joypadBufferPtr = null;
       }
 
       if (this.module && this.romDataPtr) {

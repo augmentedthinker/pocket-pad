@@ -1173,7 +1173,7 @@
       <div class="panel-card">
         <div class="panel-title">
           <span>Cartridge Vault</span>
-          <span style="font-size: 10px; color: var(--accent-magenta);">10 CLASSICS</span>
+          <span style="font-size: 10px; color: var(--accent-magenta);">13 ALL-TIME CLASSICS</span>
         </div>
 
         <div class="cartridge-list" id="cartridge-list">
@@ -1226,7 +1226,7 @@
     let peerConn = null;
     let supabaseClient = null;
     let supabaseChannel = null;
-    let activeRomId = 'tobu';
+    let activeRomId = 'tetris';
 
     // Highlight on-screen visual buttons
     function updateVisualButton(btn, isDown) {
@@ -1269,6 +1269,8 @@
 
         const press = (e) => {
           e.preventDefault();
+          gb.initAudio();
+          gb.resumeAudio();
           gb.setButton(key, true);
         };
         const release = (e) => {
@@ -1477,6 +1479,8 @@
       }
 
       if (data.type === 'btn_input' && data.btn) {
+        gb.initAudio();
+        gb.resumeAudio();
         const isDown = (data.state === 'down');
         gb.setButton(data.btn, isDown);
       }
@@ -1585,6 +1589,11 @@
           loadCustomRomFile(e.dataTransfer.files[0]);
         }
       });
+      // Canvas click unlocks WebAudio
+      document.getElementById('gb-canvas').addEventListener('click', () => {
+        gb.initAudio();
+        gb.resumeAudio();
+      });
     }
 
     async function loadCustomRomFile(file) {
@@ -1617,11 +1626,16 @@
     }
 
     // Startup
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       renderCartridgeList();
       setupOnscreenControls();
       setupUI();
       initPairingConduit();
+
+      // Auto-launch Tetris (1989) immediately on startup
+      if (typeof BUILTIN_ROMS !== 'undefined' && BUILTIN_ROMS.length > 0) {
+        selectAndPlayRom(BUILTIN_ROMS[0]);
+      }
     });
   </script>
 </body>
