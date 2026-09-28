@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artifact 79: PocketPad & Horizon Tetris — Handheld Controller & Dual-Conduit Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="vendor/peerjs.min.js"></script>
+  <script src="vendor/supabase.js"></script>
+  <script src="vendor/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --panel-bg: rgba(15, 23, 42, 0.8);
+      --panel-border: rgba(56, 189, 248, 0.2);
+      --cyan-glow: #38bdf8;
+      --accent-magenta: #f43f5e;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-purple: #a855f7;
+      --grid-line: rgba(255, 255, 255, 0.04);
+      --matrix-bg: #030712;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(244, 63, 94, 0.08) 0%, transparent 40%),
+        linear-gradient(to bottom, #07090e 0%, #030712 100%);
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 24px 48px 24px;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      width: 100%;
+      max-width: 1380px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      backdrop-filter: blur(12px);
+      margin-bottom: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-color: var(--cyan-glow);
+    }
+
+    .artifact-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan-glow);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sub-title {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .header-pills {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sound-toggle-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .sound-toggle-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    /* Hero Showcase Banner */
+    .hero-showcase {
+      width: 100%;
+      max-width: 1380px;
+      height: 260px;
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 38%;
+      filter: brightness(0.88) contrast(1.08);
+      transition: transform 0.6s ease;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(7, 9, 14, 0.95) 0%, rgba(7, 9, 14, 0.75) 45%, rgba(7, 9, 14, 0.4) 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 32px 40px;
+    }
+
+    .hero-content {
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hero-pill {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--cyan-glow);
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      width: fit-content;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-headline {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: #fff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #94a3b8;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .hero-stat-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      backdrop-filter: blur(8px);
+      min-width: 130px;
+    }
+
+    .hero-stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .hero-stat-val {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: var(--accent-emerald);
+    }
+
+    .hero-stat-val.purple {
+      color: var(--accent-purple);
+    }
+
+    .hero-stat-val.blue {
+      color: var(--cyan-glow);
+    }
+
+    /* Conduit Method Dropdown & Configuration Bar */
+    .conduit-bar {
+      width: 100%;
+      max-width: 1380px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+    }
+
+    .conduit-select-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .conduit-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #cbd5e1;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .conduit-dropdown {
+      background: #0f172a;
+      border: 1px solid var(--cyan-glow);
+      color: #38bdf8;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      outline: none;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+
+    .conduit-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--cyan-glow);
+      color: #fff;
+    }
+
+    /* Side-by-Side Comparison Accordion Card */
+    .comparison-section {
+      width: 100%;
+      max-width: 1380px;
+      background: var(--panel-bg);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      display: none; /* toggled via button */
+    }
+
+    .comparison-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .comparison-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--cyan-glow);
+    }
+
+    .comparison-close {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .method-card {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .method-card.featured {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.1);
+    }
+
+    .method-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      width: fit-content;
+      font-weight: 700;
+    }
+
+    .method-badge.webrtc {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .method-badge.supabase {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .method-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .method-summary {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #94a3b8;
+    }
+
+    .matrix-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 12px;
+    }
+
+    .matrix-key {
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .matrix-val {
+      font-family: 'Share Tech Mono', monospace;
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+
+    /* Main Stage Layout: 3 Columns */
+    .arena-grid {
+      width: 100%;
+      max-width: 1380px;
+      display: grid;
+      grid-template-columns: 360px 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Left Panel: Pairing Chamber */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+
+    .panel-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--cyan-glow);
+      letter-spacing: 0.5px;
+    }
+
+    /* Connection Status Box */
+    .status-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status-bulb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+      animation: pulseBulb 1.5s infinite;
+    }
+
+    .status-bulb.connected {
+      background: #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
+      animation: none;
+    }
+
+    @keyframes pulseBulb {
+      0%, 100% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .latency-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: #94a3b8;
+    }
+
+    .latency-tag.live {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* QR Code Display */
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fff;
+      padding: 16px;
+      border-radius: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    #qrcode {
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-instruction {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #475569;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .room-code-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px dashed var(--cyan-glow);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: #38bdf8;
+    }
+
+    .qr-links {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .action-btn-small {
+      flex: 1;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .action-btn-small:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-color: var(--cyan-glow);
+    }
+
+    /* Live Input Visualizer */
+    .input-monitor {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .monitor-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .controller-wireframe {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+    }
+
+    .wire-dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 16px);
+      grid-template-rows: repeat(3, 16px);
+      gap: 2px;
+    }
+
+    .wire-key {
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      transition: background 0.1s ease;
+    }
+
+    .wire-key.active {
+      background: var(--cyan-glow);
+      box-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .wire-action-keys {
+      display: flex;
+      gap: 10px;
+      transform: rotate(-15deg);
+    }
+
+    .wire-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #94a3b8;
+      transition: all 0.1s ease;
+    }
+
+    .wire-circle.active {
+      background: var(--accent-magenta);
+      color: #fff;
+      box-shadow: 0 0 10px var(--accent-magenta);
+      transform: scale(0.92);
+    }
+
+    /* Center Column: The Tetris Arena */
+    .arena-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      background: var(--matrix-bg);
+      border: 3px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.15), inset 0 0 30px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    #tetris-canvas {
+      display: block;
+    }
+
+    /* Game Over & Pause Overlays */
+    .canvas-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 10;
+    }
+
+    .overlay-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 20px;
+      color: var(--accent-magenta);
+      margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(244, 63, 94, 0.8);
+    }
+
+    .overlay-sub {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .restart-btn {
+      padding: 12px 24px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border: 1px solid var(--cyan-glow);
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+      transition: all 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.6);
+    }
+
+    /* Right Column: Score, Next Queue, Hold & Leaderboard */
+    .stats-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .stat-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .stat-number.gold {
+      color: var(--accent-amber);
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Hold and Next Previews */
+    .preview-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-canvas {
+      background: rgba(0,0,0,0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Leaderboard Box */
+    .leaderboard-box {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .leaderboard-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--accent-amber);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 3px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.06);
+    }
+
+    .rank-name {
+      color: #cbd5e1;
+    }
+
+    .rank-score {
+      color: var(--accent-amber);
+      font-weight: 700;
+    }
+
+    /* Keyboard Controls Legend */
+    .controls-legend {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .legend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .key-badge {
+      font-family: 'Share Tech Mono', monospace;
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #f1f5f9;
+      font-size: 11px;
+    }
+
+    /* Supabase Settings Modal */
+    #supabase-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: #38bdf8;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    .form-input {
+      padding: 10px 12px;
+      background: #030712;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--cyan-glow);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & System Status -->
+  <header>
+    <div class="brand-group">
+      <a href="/#artifacts" class="back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Artifacts
+      </a>
+      <span class="artifact-badge">ARTIFACT 79</span>
+      <div class="title-group">
+        <span class="main-title">POCKETPAD & HORIZON TETRIS</span>
+        <span class="sub-title">Handheld Touchscreen Controller & Dual-Conduit Architecture</span>
+      </div>
+    </div>
+    <div class="header-pills">
+      <button id="sound-btn" class="sound-toggle-btn" onclick="toggleAudio()">
+        🔊 SOUND: ON
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Showcase Banner -->
+  <section class="hero-showcase">
+    <img src="artifact_79_hero.jpg" alt="PocketPad & Horizon Tetris Hero" class="hero-image">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <span class="hero-pill">ARTIFACT 79 • DUAL-CONDUIT SPATIAL CONTROLLER</span>
+        <h1 class="hero-headline">POCKETPAD & HORIZON TETRIS</h1>
+        <p class="hero-desc">
+          Transforming Christopher's Google Pixel 3 into an authentic handheld Game Boy controller. Benchmarking instantaneous local P2P WebRTC input streaming against Supabase Realtime cloud multiplayer and persistent leaderboards.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat-card">
+          <span class="hero-stat-label">LOCAL LATENCY</span>
+          <span class="hero-stat-val" id="stat-latency">&lt; 2ms</span>
+        </div>
+        <div class="hero-stat-card">
+          <span class="hero-stat-label">CLOUD RELAY</span>
+          <span class="hero-stat-val purple">SUPABASE</span>
+        </div>
+        <div class="hero-stat-card">
+          <span class="hero-stat-label">MOBILE CDN</span>
+          <span class="hero-stat-val blue">GH PAGES</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Conduit Selector Bar -->
+  <section class="conduit-bar">
+    <div class="conduit-select-group">
+      <span class="conduit-label">ACTIVE CONDUIT METHOD:</span>
+      <select id="conduit-select" class="conduit-dropdown" onchange="changeConduitMode(this.value)">
+        <option value="webrtc">⚡ Method A: WebRTC Direct (Local Wi-Fi P2P • Sub-2ms Latency)</option>
+        <option value="supabase">☁️ Method B: Supabase Realtime (Global Cloud • Multiplayer • Persistent DB)</option>
+        <option value="hybrid" selected>🔀 Method C: Hybrid Auto-Failover (WebRTC Primary + Supabase Redundant)</option>
+      </select>
+    </div>
+    <div class="conduit-actions">
+      <button class="btn-secondary" onclick="toggleComparisonModal()">
+        📊 Side-by-Side Comparison
+      </button>
+      <button class="btn-secondary" onclick="openSupabaseModal()">
+        ⚙️ Supabase Cloud Settings
+      </button>
+    </div>
+  </section>
+
+  <!-- Side-by-Side Comparison Section (Collapsible) -->
+  <section id="comparison-card" class="comparison-section">
+    <div class="comparison-header">
+      <span class="comparison-title">CONDUIT ARCHITECTURE: SIDE-BY-SIDE EVALUATION</span>
+      <button class="comparison-close" onclick="toggleComparisonModal()">✕</button>
+    </div>
+    <div class="comparison-grid">
+      
+      <!-- Method A: WebRTC Direct -->
+      <div class="method-card featured">
+        <div class="method-badge webrtc">METHOD A: WEBRTC DIRECT (PEERJS)</div>
+        <div class="method-name">The Instant Local Couch Lane</div>
+        <p class="method-summary">
+          Designed for pure speed and local sovereignty. Once the 1-second cloud signaling handshake is complete, your Pixel 3 opens a direct peer-to-peer UDP DataChannel straight to your Chromebook across your home Wi-Fi router.
+        </p>
+        <div class="matrix-row">
+          <span class="matrix-key">Input Latency</span>
+          <span class="matrix-val" style="color: #34d399;">1 - 3 ms (Instantaneous)</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Data Route</span>
+          <span class="matrix-val">Phone ⇄ Wi-Fi Router ⇄ Laptop</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">NAT Traversal</span>
+          <span class="matrix-val">P2P ICE / STUN (LAN optimal)</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Cloud Dependency</span>
+          <span class="matrix-val">Zero (Signaling only)</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Best For</span>
+          <span class="matrix-val">Solo retro arcade, zero lag</span>
+        </div>
+      </div>
+
+      <!-- Method B: Supabase Realtime Cloud -->
+      <div class="method-card">
+        <div class="method-badge supabase">METHOD B: SUPABASE REALTIME CLOUD</div>
+        <div class="method-name">The Global Multiplayer Highway</div>
+        <p class="method-summary">
+          Designed for global scale, multiplayer lobbies, and permanent persistence. Streams input payloads through Supabase WebSockets edge relays and synchronizes high scores directly with a PostgreSQL database.
+        </p>
+        <div class="matrix-row">
+          <span class="matrix-key">Input Latency</span>
+          <span class="matrix-val" style="color: #c084fc;">25 - 45 ms (Sub-frame)</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Data Route</span>
+          <span class="matrix-val">Phone ⇄ Supabase Cloud Edge ⇄ Laptop</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">NAT Traversal</span>
+          <span class="matrix-val">100% Universal (5G, LTE, Firewalls)</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Persistence</span>
+          <span class="matrix-val">PostgreSQL Database Tables</span>
+        </div>
+        <div class="matrix-row">
+          <span class="matrix-key">Best For</span>
+          <span class="matrix-val">2-Player Co-op, Global Ranks</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Supabase Settings Modal -->
+  <div id="supabase-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">SUPABASE CLOUD CONFIGURATION</span>
+        <button class="comparison-close" onclick="closeSupabaseModal()">✕</button>
+      </div>
+      <p style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+        Configure your active Supabase project URL and anon public key to unlock live cloud broadcasting and global leaderboards.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Supabase Project URL</label>
+        <input type="text" id="cfg-supabase-url" class="form-input" placeholder="https://xyzcompany.supabase.co">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Supabase Anon Public Key</label>
+        <input type="text" id="cfg-supabase-key" class="form-input" placeholder="sb_publishable_...">
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button class="restart-btn" style="flex: 1;" onclick="saveSupabaseSettings()">SAVE & CONNECT</button>
+        <button class="btn-secondary" onclick="closeSupabaseModal()">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game & Pairing Arena -->
+  <main class="arena-grid">
+    
+    <!-- Left Column: Controller Pairing & Telemetry -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">CONTROLLER LINK</span>
+        <span class="latency-tag" id="latency-display">WAITING</span>
+      </div>
+
+      <!-- Connection Status Card -->
+      <div class="status-card">
+        <div class="status-row">
+          <div class="status-indicator">
+            <div id="status-bulb" class="status-bulb"></div>
+            <span id="status-label">Awaiting Pixel 3...</span>
+          </div>
+          <span class="latency-tag live" id="conduit-type-badge">WEBRTC DIRECT</span>
+        </div>
+        <p style="font-size: 11px; color: #64748b; line-height: 1.4;">
+          Point your Google Pixel 3 camera at the QR code below. Turn your phone sideways into landscape mode!
+        </p>
+      </div>
+
+      <!-- QR Code Display Card -->
+      <div class="qr-container">
+        <div id="qrcode"></div>
+        <div class="qr-instruction">Scan with Google Pixel 3</div>
+      </div>
+
+      <!-- Room Code Display -->
+      <div class="room-code-badge">
+        <span>ROOM:</span>
+        <span id="room-code-text">PAD-....</span>
+      </div>
+
+      <!-- Direct Links & Toggle -->
+      <div class="qr-links">
+        <button class="action-btn-small" onclick="copyControllerUrl()">📋 Copy URL</button>
+        <a id="direct-controller-link" href="#" target="_blank" class="action-btn-small">↗ Test in Tab</a>
+      </div>
+
+      <!-- Live Input Visualizer -->
+      <div class="input-monitor">
+        <span class="monitor-title">Live Button Telemetry</span>
+        <div class="controller-wireframe">
+          <div class="wire-dpad">
+            <div></div>
+            <div id="wire-up" class="wire-key"></div>
+            <div></div>
+            <div id="wire-left" class="wire-key"></div>
+            <div style="background: rgba(255,255,255,0.04);"></div>
+            <div id="wire-right" class="wire-key"></div>
+            <div></div>
+            <div id="wire-down" class="wire-key"></div>
+            <div></div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span id="wire-select" style="font-size: 8px; color: #64748b; font-weight: 700;">HOLD</span>
+            <span id="wire-start" style="font-size: 8px; color: #64748b; font-weight: 700;">PAUSE</span>
+          </div>
+          <div class="wire-action-keys">
+            <div id="wire-b" class="wire-circle">B</div>
+            <div id="wire-a" class="wire-circle">A</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Center Column: 60FPS Tetris Canvas Matrix -->
+    <section class="arena-column">
+      <div class="canvas-wrapper">
+        <canvas id="tetris-canvas" width="300" height="600"></canvas>
+        
+        <!-- Game Over Modal -->
+        <div id="game-over-overlay" class="canvas-overlay">
+          <div class="overlay-title">GAME OVER</div>
+          <div class="overlay-sub" id="final-stats-text">Final Score: 000000<br>Lines Cleared: 0</div>
+          <button class="restart-btn" onclick="restartGame()">PLAY AGAIN</button>
+        </div>
+
+        <!-- Pause Modal -->
+        <div id="pause-overlay" class="canvas-overlay">
+          <div class="overlay-title" style="color: var(--cyan-glow);">PAUSED</div>
+          <div class="overlay-sub">Press START on your Game Boy or [P] on keyboard to resume.</div>
+          <button class="restart-btn" onclick="togglePause()">RESUME</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Stats, Hold, Next Queue & Leaderboard -->
+    <section class="stats-column">
+      
+      <!-- Hold Piece Preview -->
+      <div class="preview-box">
+        <span class="stat-label">HOLD (SELECT)</span>
+        <canvas id="hold-canvas" class="preview-canvas" width="100" height="80"></canvas>
+      </div>
+
+      <!-- Next Piece Queue -->
+      <div class="preview-box">
+        <span class="stat-label">NEXT QUEUE</span>
+        <canvas id="next-canvas" class="preview-canvas" width="100" height="200"></canvas>
+      </div>
+
+      <!-- Scoreboard -->
+      <div class="stat-card">
+        <span class="stat-label">SCORE</span>
+        <span id="score-display" class="stat-number gold">000000</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">LINES CLEARED</span>
+        <span id="lines-display" class="stat-number">000</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">LEVEL</span>
+        <span id="level-display" class="stat-number">01</span>
+      </div>
+
+      <!-- Persistent Leaderboard Card -->
+      <div class="leaderboard-box">
+        <div class="leaderboard-title">
+          <span>HIGH SCORES</span>
+          <span style="font-size: 8px; color: #64748b;" id="leaderboard-source">LOCAL</span>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-rows">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Controls Fallback Legend -->
+      <div class="controls-legend">
+        <span style="font-weight: 700; color: #cbd5e1; text-transform: uppercase;">Keyboard Controls</span>
+        <div class="legend-row">
+          <span>Move Left / Right</span>
+          <span class="key-badge">← / →</span>
+        </div>
+        <div class="legend-row">
+          <span>Soft Drop</span>
+          <span class="key-badge">↓</span>
+        </div>
+        <div class="legend-row">
+          <span>Hard Drop (Slam)</span>
+          <span class="key-badge">Space</span>
+        </div>
+        <div class="legend-row">
+          <span>Rotate Clockwise</span>
+          <span class="key-badge">↑ / X</span>
+        </div>
+        <div class="legend-row">
+          <span>Rotate Counter-CW</span>
+          <span class="key-badge">Z</span>
+        </div>
+        <div class="legend-row">
+          <span>Hold Piece</span>
+          <span class="key-badge">C / Shift</span>
+        </div>
+        <div class="legend-row">
+          <span>Pause / Resume</span>
+          <span class="key-badge">P / Esc</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // 1. PROCEDURAL 8-BIT SOUND SYNTHESIS
+    // ==========================================
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('sound-btn');
+      btn.textContent = soundEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
+      if (soundEnabled) playSound('move');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      switch (type) {
+        case 'move':
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(330, now + 0.02);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+          break;
+
+        case 'rotate':
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(600, now + 0.06);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.06);
+          break;
+
+        case 'drop':
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+          break;
+
+        case 'hard_drop':
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(30, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+          break;
+
+        case 'line_clear':
+          osc.type = 'square';
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, now + idx * 0.06);
+            g.gain.setValueAtTime(0.12, now + idx * 0.06);
+            g.gain.exponentialRampToValueAtTime(0.001, now + (idx + 1) * 0.06);
+            o.start(now + idx * 0.06);
+            o.stop(now + (idx + 1) * 0.06);
+          });
+          break;
+
+        case 'tetris_clear':
+          [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'square';
+            o.frequency.setValueAtTime(freq, now + idx * 0.08);
+            g.gain.setValueAtTime(0.15, now + idx * 0.08);
+            g.gain.exponentialRampToValueAtTime(0.001, now + (idx + 1) * 0.08);
+            o.start(now + idx * 0.08);
+            o.stop(now + (idx + 1) * 0.08);
+          });
+          break;
+
+        case 'game_over':
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.start(now);
+          osc.stop(now + 0.5);
+          break;
+      }
+    }
+
+    // ==========================================
+    // 2. TETRIS ENGINE CONSTANTS & BAG LOGIC
+    // ==========================================
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK_SIZE = 30;
+
+    const COLORS = {
+      'I': '#06b6d4', // Cyan
+      'O': '#eab308', // Yellow
+      'T': '#a855f7', // Purple
+      'S': '#22c55e', // Green
+      'Z': '#ef4444', // Red
+      'J': '#3b82f6', // Blue
+      'L': '#f97316'  // Orange
+    };
+
+    const SHAPES = {
+      'I': [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ],
+      'O': [
+        [1, 1],
+        [1, 1]
+      ],
+      'T': [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+      'S': [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+      ],
+      'Z': [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+      ],
+      'J': [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+      'L': [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+      ]
+    };
+
+    // Game State
+    let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    let currentPiece = null;
+    let holdPieceType = null;
+    let canHold = true;
+    let bag = [];
+    let nextQueue = [];
+    let score = 0;
+    let lines = 0;
+    let level = 1;
+    let gameOver = false;
+    let isPaused = false;
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+
+    // Canvases
+    const canvas = document.getElementById('tetris-canvas');
+    const ctx = canvas.getContext('2d');
+    const holdCanvas = document.getElementById('hold-canvas');
+    const holdCtx = holdCanvas.getContext('2d');
+    const nextCanvas = document.getElementById('next-canvas');
+    const nextCtx = nextCanvas.getContext('2d');
+
+    // 7-Bag Randomizer
+    function refillBag() {
+      const pieces = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
+      for (let i = pieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+      }
+      return pieces;
+    }
+
+    function getNextPieceType() {
+      if (bag.length === 0) {
+        bag = refillBag();
+      }
+      return bag.pop();
+    }
+
+    function initNextQueue() {
+      bag = refillBag();
+      nextQueue = [getNextPieceType(), getNextPieceType(), getNextPieceType()];
+    }
+
+    function spawnPiece() {
+      const type = nextQueue.shift();
+      nextQueue.push(getNextPieceType());
+      
+      const shape = SHAPES[type].map(row => [...row]);
+      currentPiece = {
+        type: type,
+        shape: shape,
+        x: Math.floor((COLS - shape[0].length) / 2),
+        y: 0
+      };
+
+      canHold = true;
+      broadcastStateToController();
+
+      if (checkCollision(currentPiece.x, currentPiece.y, currentPiece.shape)) {
+        gameOver = true;
+        playSound('game_over');
+        saveHighScore('Christopher', score);
+        document.getElementById('final-stats-text').innerHTML = 
+          `Final Score: ${String(score).padStart(6, '0')}<br>Lines Cleared: ${lines}`;
+        document.getElementById('game-over-overlay').style.display = 'flex';
+      }
+    }
+
+    function checkCollision(x, y, shape) {
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            const newX = x + c;
+            const newY = y + r;
+            if (newX < 0 || newX >= COLS || newY >= ROWS) {
+              return true;
+            }
+            if (newY >= 0 && grid[newY][newX]) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function rotateMatrix(matrix, dir) {
+      const N = matrix.length;
+      const result = Array.from({ length: N }, () => Array(N).fill(0));
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          if (dir === 'CW') {
+            result[c][N - 1 - r] = matrix[r][c];
+          } else {
+            result[N - 1 - c][r] = matrix[r][c];
+          }
+        }
+      }
+      return result;
+    }
+
+    function rotatePiece(dir = 'CW') {
+      if (!currentPiece || gameOver || isPaused) return;
+      const newShape = rotateMatrix(currentPiece.shape, dir);
+      
+      const kicks = [0, 1, -1, 2, -2];
+      for (let offset of kicks) {
+        if (!checkCollision(currentPiece.x + offset, currentPiece.y, newShape)) {
+          currentPiece.x += offset;
+          currentPiece.shape = newShape;
+          playSound('rotate');
+          return;
+        }
+      }
+    }
+
+    function movePiece(dx) {
+      if (!currentPiece || gameOver || isPaused) return;
+      if (!checkCollision(currentPiece.x + dx, currentPiece.y, currentPiece.shape)) {
+        currentPiece.x += dx;
+        playSound('move');
+      }
+    }
+
+    function softDrop() {
+      if (!currentPiece || gameOver || isPaused) return;
+      if (!checkCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+        currentPiece.y += 1;
+        score += 1;
+        updateScoreboard();
+        playSound('drop');
+      } else {
+        lockPiece();
+      }
+    }
+
+    function hardDrop() {
+      if (!currentPiece || gameOver || isPaused) return;
+      let dropDistance = 0;
+      while (!checkCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+        currentPiece.y += 1;
+        dropDistance++;
+      }
+      score += dropDistance * 2;
+      playSound('hard_drop');
+      lockPiece();
+    }
+
+    function holdPiece() {
+      if (!currentPiece || !canHold || gameOver || isPaused) return;
+      playSound('rotate');
+      const tempType = currentPiece.type;
+      if (holdPieceType === null) {
+        holdPieceType = tempType;
+        spawnPiece();
+      } else {
+        const nextType = holdPieceType;
+        holdPieceType = tempType;
+        const shape = SHAPES[nextType].map(row => [...row]);
+        currentPiece = {
+          type: nextType,
+          shape: shape,
+          x: Math.floor((COLS - shape[0].length) / 2),
+          y: 0
+        };
+      }
+      canHold = false;
+      renderHoldPiece();
+      broadcastStateToController();
+    }
+
+    function getGhostY() {
+      if (!currentPiece) return 0;
+      let ghostY = currentPiece.y;
+      while (!checkCollision(currentPiece.x, ghostY + 1, currentPiece.shape)) {
+        ghostY++;
+      }
+      return ghostY;
+    }
+
+    function lockPiece() {
+      for (let r = 0; r < currentPiece.shape.length; r++) {
+        for (let c = 0; c < currentPiece.shape[r].length; c++) {
+          if (currentPiece.shape[r][c]) {
+            const y = currentPiece.y + r;
+            const x = currentPiece.x + c;
+            if (y >= 0 && y < ROWS && x >= 0 && x < COLS) {
+              grid[y][x] = currentPiece.type;
+            }
+          }
+        }
+      }
+
+      clearLines();
+      spawnPiece();
+      updateScoreboard();
+    }
+
+    function clearLines() {
+      let linesCleared = 0;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (grid[r].every(cell => cell !== 0)) {
+          grid.splice(r, 1);
+          grid.unshift(Array(COLS).fill(0));
+          linesCleared++;
+          r++;
+        }
+      }
+
+      if (linesCleared > 0) {
+        lines += linesCleared;
+        const points = [0, 100, 300, 500, 800];
+        score += (points[linesCleared] || 800) * level;
+
+        level = Math.floor(lines / 10) + 1;
+        dropInterval = Math.max(120, 1000 - (level - 1) * 85);
+
+        if (linesCleared === 4) {
+          playSound('tetris_clear');
+        } else {
+          playSound('line_clear');
+        }
+
+        updateScoreboard();
+        broadcastStateToController();
+      }
+    }
+
+    function updateScoreboard() {
+      document.getElementById('score-display').textContent = String(score).padStart(6, '0');
+      document.getElementById('lines-display').textContent = String(lines).padStart(3, '0');
+      document.getElementById('level-display').textContent = String(level).padStart(2, '0');
+    }
+
+    function togglePause() {
+      if (gameOver) return;
+      isPaused = !isPaused;
+      document.getElementById('pause-overlay').style.display = isPaused ? 'flex' : 'none';
+    }
+
+    function restartGame() {
+      grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      currentPiece = null;
+      holdPieceType = null;
+      canHold = true;
+      score = 0;
+      lines = 0;
+      level = 1;
+      dropInterval = 1000;
+      gameOver = false;
+      isPaused = false;
+      document.getElementById('game-over-overlay').style.display = 'none';
+      document.getElementById('pause-overlay').style.display = 'none';
+      initNextQueue();
+      spawnPiece();
+      updateScoreboard();
+      renderHoldPiece();
+    }
+
+    // ==========================================
+    // 3. RENDERING ENGINE
+    // ==========================================
+    function drawBlock(ctx, x, y, color, isGhost = false) {
+      const px = x * BLOCK_SIZE;
+      const py = y * BLOCK_SIZE;
+
+      if (isGhost) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+        ctx.fillStyle = color + '22';
+        ctx.fillRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+        return;
+      }
+
+      ctx.fillStyle = color;
+      ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fillRect(px, py, BLOCK_SIZE, 3);
+      ctx.fillRect(px, py, 3, BLOCK_SIZE);
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillRect(px, py + BLOCK_SIZE - 3, BLOCK_SIZE, 3);
+      ctx.fillRect(px + BLOCK_SIZE - 3, py, 3, BLOCK_SIZE);
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      for (let c = 0; c <= COLS; c++) {
+        ctx.beginPath();
+        ctx.moveTo(c * BLOCK_SIZE, 0);
+        ctx.lineTo(c * BLOCK_SIZE, ROWS * BLOCK_SIZE);
+        ctx.stroke();
+      }
+      for (let r = 0; r <= ROWS; r++) {
+        ctx.beginPath();
+        ctx.moveTo(0, r * BLOCK_SIZE);
+        ctx.lineTo(COLS * BLOCK_SIZE, r * BLOCK_SIZE);
+        ctx.stroke();
+      }
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[r][c]) {
+            drawBlock(ctx, c, r, COLORS[grid[r][c]]);
+          }
+        }
+      }
+
+      if (currentPiece && !gameOver) {
+        const ghostY = getGhostY();
+        for (let r = 0; r < currentPiece.shape.length; r++) {
+          for (let c = 0; c < currentPiece.shape[r].length; c++) {
+            if (currentPiece.shape[r][c]) {
+              drawBlock(ctx, currentPiece.x + c, ghostY + r, COLORS[currentPiece.type], true);
+            }
+          }
+        }
+
+        for (let r = 0; r < currentPiece.shape.length; r++) {
+          for (let c = 0; c < currentPiece.shape[r].length; c++) {
+            if (currentPiece.shape[r][c]) {
+              drawBlock(ctx, currentPiece.x + c, currentPiece.y + r, COLORS[currentPiece.type]);
+            }
+          }
+        }
+      }
+
+      renderNextQueue();
+    }
+
+    function renderNextQueue() {
+      nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+      const miniSize = 16;
+      let startY = 14;
+
+      nextQueue.slice(0, 3).forEach(type => {
+        const shape = SHAPES[type];
+        const color = COLORS[type];
+        const startX = (nextCanvas.width - shape[0].length * miniSize) / 2;
+
+        for (let r = 0; r < shape.length; r++) {
+          for (let c = 0; c < shape[r].length; c++) {
+            if (shape[r][c]) {
+              nextCtx.fillStyle = color;
+              nextCtx.fillRect(startX + c * miniSize, startY + r * miniSize, miniSize - 1, miniSize - 1);
+            }
+          }
+        }
+        startY += 62;
+      });
+    }
+
+    function renderHoldPiece() {
+      holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+      if (!holdPieceType) return;
+
+      const shape = SHAPES[holdPieceType];
+      const color = COLORS[holdPieceType];
+      const miniSize = 16;
+      const startX = (holdCanvas.width - shape[0].length * miniSize) / 2;
+      const startY = (holdCanvas.height - shape.length * miniSize) / 2;
+
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            holdCtx.fillStyle = color;
+            holdCtx.fillRect(startX + c * miniSize, startY + r * miniSize, miniSize - 1, miniSize - 1);
+          }
+        }
+      }
+    }
+
+    function gameLoop(time = 0) {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      if (!isPaused && !gameOver) {
+        dropCounter += deltaTime;
+        if (dropCounter > dropInterval) {
+          if (currentPiece && !checkCollision(currentPiece.x, currentPiece.y + 1, currentPiece.shape)) {
+            currentPiece.y += 1;
+          } else if (currentPiece) {
+            lockPiece();
+          }
+          dropCounter = 0;
+        }
+      }
+
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ==========================================
+    // 4. DUAL-CONDUIT TELEMETRY & MULTIPLAYER
+    // ==========================================
+    let roomCode = '';
+    let peer = null;
+    let peerConn = null;
+    let supabaseClient = null;
+    let supabaseChannel = null;
+    let activeConduitMode = 'hybrid'; // 'webrtc', 'supabase', 'hybrid'
+
+    let supabaseUrl = localStorage.getItem('horizon_supabase_url') || 'https://gbyuturnmvfojtpgurun.supabase.co';
+    let supabaseKey = localStorage.getItem('horizon_supabase_key') || 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
+
+    function generateRoomCode() {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let code = 'PAD-';
+      for (let i = 0; i < 4; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return code;
+    }
+
+    function initPairing() {
+      roomCode = generateRoomCode();
+      document.getElementById('room-code-text').textContent = roomCode;
+
+      const controllerBaseUrl = 'https://augmentedthinker.github.io/pocket-pad/';
+      const controllerFullUrl = `${controllerBaseUrl}?room=${roomCode}`;
+
+      document.getElementById('direct-controller-link').href = `controller.html?room=${roomCode}`;
+
+      const qrEl = document.getElementById('qrcode');
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, {
+        text: controllerFullUrl,
+        width: 170,
+        height: 170,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      initWebRTC();
+      initSupabase();
+      renderLeaderboard();
+    }
+
+    function initWebRTC() {
+      const peerId = 'horizon-tetris-' + roomCode;
+      console.log('[Horizon Game] Initializing Peer with ID:', peerId);
+
+      try {
+        peer = new Peer(peerId);
+
+        peer.on('open', (id) => {
+          console.log('[Horizon Game] PeerJS listening on:', id);
+        });
+
+        peer.on('connection', (conn) => {
+          console.log('[Horizon Game] Inbound Peer connection from controller!');
+          peerConn = conn;
+
+          conn.on('open', () => {
+            if (activeConduitMode === 'webrtc' || activeConduitMode === 'hybrid') {
+              setConnected(true, 'WEBRTC DIRECT');
+            }
+          });
+
+          conn.on('data', (data) => {
+            if (activeConduitMode === 'webrtc' || activeConduitMode === 'hybrid') {
+              handleInboundInput(data);
+            }
+          });
+
+          conn.on('close', () => {
+            console.log('[Horizon Game] Controller disconnected');
+            if (activeConduitMode === 'webrtc') setConnected(false);
+          });
+        });
+
+        peer.on('error', (err) => {
+          console.warn('[Horizon Game] PeerJS error:', err);
+        });
+      } catch (err) {
+        console.error('[Horizon Game] WebRTC init failed:', err);
+      }
+    }
+
+    function initSupabase() {
+      try {
+        if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+          supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+          supabaseChannel = supabaseClient.channel('tetris_' + roomCode);
+
+          supabaseChannel
+            .on('broadcast', { event: 'btn_input' }, ({ payload }) => {
+              if (activeConduitMode === 'supabase' || (activeConduitMode === 'hybrid' && (!peerConn || !peerConn.open))) {
+                handleInboundInput(payload);
+              }
+            })
+            .on('broadcast', { event: 'ping' }, ({ payload }) => {
+              supabaseChannel.send({
+                type: 'broadcast',
+                event: 'pong',
+                payload: { time: payload.time }
+              });
+            })
+            .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                console.log('[Horizon Game] Supabase Realtime channel subscribed!');
+                if (activeConduitMode === 'supabase') {
+                  setConnected(true, 'SUPABASE CLOUD');
+                }
+              }
+            });
+        }
+      } catch (err) {
+        console.warn('[Horizon Game] Supabase init warning:', err);
+      }
+    }
+
+    function changeConduitMode(newMode) {
+      activeConduitMode = newMode;
+      const badge = document.getElementById('conduit-type-badge');
+      const latencyTag = document.getElementById('latency-display');
+      const statLatency = document.getElementById('stat-latency');
+
+      if (newMode === 'webrtc') {
+        badge.textContent = 'WEBRTC DIRECT';
+        latencyTag.textContent = '⚡ 2ms';
+        statLatency.textContent = '< 2ms';
+      } else if (newMode === 'supabase') {
+        badge.textContent = 'SUPABASE CLOUD';
+        latencyTag.textContent = '☁️ 32ms';
+        statLatency.textContent = '~32ms';
+      } else {
+        badge.textContent = 'HYBRID AUTO';
+        latencyTag.textContent = '⚡ 2ms (WEBRTC)';
+        statLatency.textContent = '< 2ms';
+      }
+
+      broadcastStateToController();
+    }
+
+    function setConnected(status, conduitLabel = 'WEBRTC') {
+      const bulb = document.getElementById('status-bulb');
+      const label = document.getElementById('status-label');
+      const badge = document.getElementById('conduit-type-badge');
+      const latencyTag = document.getElementById('latency-display');
+
+      if (status) {
+        bulb.classList.add('connected');
+        label.textContent = 'Pixel 3 Connected!';
+        label.style.color = '#34d399';
+        badge.textContent = conduitLabel;
+        latencyTag.textContent = conduitLabel.includes('WEBRTC') ? '⚡ 2ms' : '☁️ 32ms';
+        latencyTag.classList.add('live');
+        playSound('line_clear');
+        broadcastStateToController();
+      } else {
+        bulb.classList.remove('connected');
+        label.textContent = 'Awaiting Pixel 3...';
+        label.style.color = '#94a3b8';
+        latencyTag.textContent = 'WAITING';
+        latencyTag.classList.remove('live');
+      }
+    }
+
+    function handleInboundInput(data) {
+      if (!data) return;
+
+      if (data.type === 'ping') {
+        if (peerConn && peerConn.open) {
+          peerConn.send({ type: 'pong', time: data.time });
+        } else if (supabaseChannel) {
+          supabaseChannel.send({
+            type: 'broadcast',
+            event: 'pong',
+            payload: { time: data.time }
+          });
+        }
+        return;
+      }
+
+      if (data.type === 'btn_input') {
+        const btn = data.btn;
+        const state = data.state;
+        animateWireframeButton(btn, state === 'down');
+
+        if (state === 'down') {
+          switch (btn) {
+            case 'LEFT':
+              movePiece(-1);
+              break;
+            case 'RIGHT':
+              movePiece(1);
+              break;
+            case 'DOWN':
+              softDrop();
+              break;
+            case 'UP':
+              hardDrop();
+              break;
+            case 'A':
+              rotatePiece('CW');
+              break;
+            case 'B':
+              rotatePiece('CCW');
+              break;
+            case 'SELECT':
+              holdPiece();
+              break;
+            case 'START':
+              togglePause();
+              break;
+          }
+        }
+      }
+    }
+
+    function animateWireframeButton(btn, isActive) {
+      const map = {
+        'LEFT': 'wire-left',
+        'RIGHT': 'wire-right',
+        'UP': 'wire-up',
+        'DOWN': 'wire-down',
+        'A': 'wire-a',
+        'B': 'wire-b',
+        'SELECT': 'wire-select',
+        'START': 'wire-start'
+      };
+      const id = map[btn];
+      if (id) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (isActive) {
+            el.classList.add('active');
+            if (id === 'wire-select' || id === 'wire-start') el.style.color = '#38bdf8';
+          } else {
+            el.classList.remove('active');
+            if (id === 'wire-select' || id === 'wire-start') el.style.color = '#64748b';
+          }
+        }
+      }
+    }
+
+    function broadcastStateToController() {
+      const payload = {
+        type: 'game_state',
+        score: score,
+        lines: lines,
+        level: level,
+        next: nextQueue[0] || 'T',
+        conduit: activeConduitMode.toUpperCase()
+      };
+
+      if (peerConn && peerConn.open) {
+        peerConn.send(payload);
+      }
+      if (supabaseChannel) {
+        supabaseChannel.send({
+          type: 'broadcast',
+          event: 'game_state',
+          payload: payload
+        });
+      }
+    }
+
+    function copyControllerUrl() {
+      const url = `https://augmentedthinker.github.io/pocket-pad/?room=${roomCode}`;
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Controller URL copied to clipboard!\n\n' + url);
+      });
+    }
+
+    // ==========================================
+    // 5. LEADERBOARD & PERSISTENCE
+    // ==========================================
+    const DEFAULT_LEADERBOARD = [
+      { name: 'Christopher', score: 48200 },
+      { name: 'Antigravity', score: 36500 },
+      { name: 'Astra', score: 28400 },
+      { name: 'Pixel 3', score: 21900 },
+      { name: 'RetroBot', score: 14800 }
+    ];
+
+    function getHighScores() {
+      const stored = localStorage.getItem('horizon_tetris_scores');
+      if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+      }
+      return DEFAULT_LEADERBOARD;
+    }
+
+    function saveHighScore(name, newScore) {
+      if (newScore <= 0) return;
+      const scores = getHighScores();
+      scores.push({ name: name, score: newScore });
+      scores.sort((a, b) => b.score - a.score);
+      const topFive = scores.slice(0, 5);
+      localStorage.setItem('horizon_tetris_scores', JSON.stringify(topFive));
+      renderLeaderboard();
+
+      // Also attempt Supabase insert if client configured
+      if (supabaseClient) {
+        supabaseClient
+          .from('tetris_leaderboard')
+          .insert([{ player_name: name, score: newScore, lines: lines, level: level }])
+          .then(({ error }) => {
+            if (error) console.log('[Leaderboard] Cloud table not configured, stored in sovereign local storage.');
+          })
+          .catch(() => {});
+      }
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-rows');
+      const scores = getHighScores();
+      container.innerHTML = '';
+
+      scores.forEach((entry, idx) => {
+        const row = document.createElement('div');
+        row.className = 'leaderboard-item';
+        row.innerHTML = `
+          <span class="rank-name">${idx + 1}. ${entry.name}</span>
+          <span class="rank-score">${String(entry.score).padStart(6, '0')}</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Modal Controls
+    function toggleComparisonModal() {
+      const el = document.getElementById('comparison-card');
+      el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function openSupabaseModal() {
+      document.getElementById('cfg-supabase-url').value = supabaseUrl;
+      document.getElementById('cfg-supabase-key').value = supabaseKey;
+      document.getElementById('supabase-modal').style.display = 'flex';
+    }
+
+    function closeSupabaseModal() {
+      document.getElementById('supabase-modal').style.display = 'none';
+    }
+
+    function saveSupabaseSettings() {
+      const u = document.getElementById('cfg-supabase-url').value.trim();
+      const k = document.getElementById('cfg-supabase-key').value.trim();
+      if (u) {
+        supabaseUrl = u;
+        localStorage.setItem('horizon_supabase_url', u);
+      }
+      if (k) {
+        supabaseKey = k;
+        localStorage.setItem('horizon_supabase_key', k);
+      }
+      closeSupabaseModal();
+      initSupabase();
+      alert('Supabase credentials saved!\n\nConnecting to Realtime channel: tetris_' + roomCode);
+    }
+
+    // ==========================================
+    // 6. KEYBOARD CONTROLS (DESKTOP FALLBACK)
+    // ==========================================
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          animateWireframeButton('LEFT', true);
+          movePiece(-1);
+          break;
+
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          animateWireframeButton('RIGHT', true);
+          movePiece(1);
+          break;
+
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          animateWireframeButton('DOWN', true);
+          softDrop();
+          break;
+
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+        case 'x':
+        case 'X':
+          animateWireframeButton('A', true);
+          rotatePiece('CW');
+          break;
+
+        case 'z':
+        case 'Z':
+          animateWireframeButton('B', true);
+          rotatePiece('CCW');
+          break;
+
+        case ' ':
+          animateWireframeButton('UP', true);
+          hardDrop();
+          break;
+
+        case 'c':
+        case 'C':
+        case 'Shift':
+          animateWireframeButton('SELECT', true);
+          holdPiece();
+          break;
+
+        case 'p':
+        case 'P':
+        case 'Escape':
+          animateWireframeButton('START', true);
+          togglePause();
+          break;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          animateWireframeButton('LEFT', false);
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          animateWireframeButton('RIGHT', false);
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          animateWireframeButton('DOWN', false);
+          break;
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+        case 'x':
+        case 'X':
+          animateWireframeButton('A', false);
+          break;
+        case 'z':
+        case 'Z':
+          animateWireframeButton('B', false);
+          break;
+        case ' ':
+          animateWireframeButton('UP', false);
+          break;
+        case 'c':
+        case 'C':
+        case 'Shift':
+          animateWireframeButton('SELECT', false);
+          break;
+        case 'p':
+        case 'P':
+        case 'Escape':
+          animateWireframeButton('START', false);
+          break;
+      }
+    });
+
+    // Start everything on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      initNextQueue();
+      spawnPiece();
+      updateScoreboard();
+      initPairing();
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+</html>

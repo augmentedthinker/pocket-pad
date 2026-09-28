@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PocketPad — Horizon Handheld Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="vendor/peerjs.min.js"></script>
+  <script src="vendor/supabase.js"></script>
+  <style>
+    :root {
+      --gb-shell: #c8c6be;
+      --gb-shell-dark: #a9a79f;
+      --gb-shell-light: #dedcd5;
+      --gb-bezel: #585c63;
+      --gb-bezel-screen: #8b956d;
+      --gb-lcd-bg: #9bbc0f;
+      --gb-lcd-dark: #0f380f;
+      --gb-lcd-mid: #306230;
+      --gb-lcd-light: #8bac0f;
+      --btn-magenta: #9c2250;
+      --btn-magenta-active: #78153b;
+      --btn-dpad: #2b2b2b;
+      --btn-dpad-active: #151515;
+      --btn-rubber: #7c7e82;
+      --accent-blue: #0044aa;
+      --accent-magenta: #b01a55;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111418;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
+    }
+
+    /* Landscape Enforcement Screen */
+    #rotate-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0d1117;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      transition: opacity 0.3s ease;
+    }
+
+    @media (orientation: landscape) {
+      #rotate-overlay {
+        display: none !important;
+      }
+    }
+
+    .rotate-phone-icon {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 20px;
+      animation: rotateHint 2.4s ease-in-out infinite;
+    }
+
+    @keyframes rotateHint {
+      0%, 20% { transform: rotate(0deg); }
+      50%, 70% { transform: rotate(90deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .rotate-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #38bdf8;
+      margin-bottom: 12px;
+    }
+
+    .rotate-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      max-width: 320px;
+    }
+
+    /* Handheld Chassis Shell */
+    #gamepad-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 50% 30%, var(--gb-shell-light) 0%, var(--gb-shell) 60%, var(--gb-shell-dark) 100%);
+      box-shadow: inset 0 0 100px rgba(0,0,0,0.25);
+      position: relative;
+      padding: 8px 16px;
+    }
+
+    /* Top Strip: Branding & Quick Controls */
+    .top-strip {
+      width: 100%;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(0,0,0,0.15);
+      padding: 0 8px;
+    }
+
+    .brand-marks {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .brand-logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-sub {
+      font-size: 9px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--accent-magenta);
+      letter-spacing: 0.5px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.12);
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .status-dot.connected {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
+    }
+
+    .fullscreen-btn, .haptic-btn {
+      background: rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.2);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    }
+
+    .fullscreen-btn:active, .haptic-btn:active {
+      background: rgba(0,0,0,0.25);
+    }
+
+    /* Main Ergonomic Control Deck: Left (D-pad), Center (LCD Screen HUD & System Pills), Right (Action Buttons) */
+    .control-deck {
+      flex: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Left Zone: D-Pad */
+    .dpad-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      position: relative;
+    }
+
+    .dpad-housing {
+      width: 190px;
+      height: 190px;
+      position: relative;
+      background: radial-gradient(circle, #b5b3aa 0%, #a4a298 100%);
+      border-radius: 50%;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.25), 0 2px 5px rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dpad {
+      width: 156px;
+      height: 156px;
+      position: relative;
+    }
+
+    .dpad-btn {
+      position: absolute;
+      background: linear-gradient(145deg, #383838, #222222);
+      box-shadow: 0 5px 0 #111, 0 6px 6px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+      touch-action: none;
+    }
+
+    .dpad-btn:active, .dpad-btn.pressed {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #111, 0 3px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(0,0,0,0.4);
+      background: #181818;
+    }
+
+    .dpad-center {
+      position: absolute;
+      top: 52px;
+      left: 52px;
+      width: 52px;
+      height: 52px;
+      background: #252525;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .dpad-center::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a1a1a 0%, #2e2e2e 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+    }
+
+    .dpad-up {
+      top: 0;
+      left: 52px;
+      width: 52px;
+      height: 56px;
+      border-radius: 8px 8px 0 0;
+      z-index: 3;
+    }
+
+    .dpad-down {
+      bottom: 0;
+      left: 52px;
+      width: 52px;
+      height: 56px;
+      border-radius: 0 0 8px 8px;
+      z-index: 3;
+    }
+
+    .dpad-left {
+      top: 52px;
+      left: 0;
+      width: 56px;
+      height: 52px;
+      border-radius: 8px 0 0 8px;
+      z-index: 3;
+    }
+
+    .dpad-right {
+      top: 52px;
+      right: 0;
+      width: 56px;
+      height: 52px;
+      border-radius: 0 8px 8px 0;
+      z-index: 3;
+    }
+
+    .dpad-arrow {
+      width: 0;
+      height: 0;
+      border-style: solid;
+      opacity: 0.5;
+    }
+
+    .dpad-up .dpad-arrow {
+      border-width: 0 7px 10px 7px;
+      border-color: transparent transparent #777 transparent;
+    }
+
+    .dpad-down .dpad-arrow {
+      border-width: 10px 7px 0 7px;
+      border-color: #777 transparent transparent transparent;
+    }
+
+    .dpad-left .dpad-arrow {
+      border-width: 7px 10px 7px 0;
+      border-color: transparent #777 transparent transparent;
+    }
+
+    .dpad-right .dpad-arrow {
+      border-width: 7px 0 7px 10px;
+      border-color: transparent transparent transparent #777;
+    }
+
+    /* Center Zone: Retro LCD HUD & Pill Buttons */
+    .center-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      padding: 6px 0;
+    }
+
+    /* Mini LCD Bezel */
+    .lcd-bezel {
+      width: 90%;
+      max-width: 280px;
+      background: var(--gb-bezel);
+      border-radius: 10px 10px 24px 10px;
+      padding: 8px 12px;
+      box-shadow: inset 0 3px 6px rgba(0,0,0,0.5), 0 2px 4px rgba(255,255,255,0.3);
+      position: relative;
+    }
+
+    .bezel-top-lines {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .bezel-line {
+      height: 2px;
+      flex: 1;
+      background: var(--accent-magenta);
+      margin: 0 4px;
+    }
+
+    .bezel-line.blue {
+      background: var(--accent-blue);
+    }
+
+    .bezel-text {
+      font-size: 7px;
+      font-weight: 700;
+      color: #cbd5e1;
+      letter-spacing: 0.8px;
+    }
+
+    .lcd-screen {
+      background: #8bac0f;
+      background: radial-gradient(ellipse at center, #9bbc0f 0%, #8bac0f 70%, #769507 100%);
+      border: 3px solid #306230;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-family: 'Press Start 2P', monospace;
+      color: #0f380f;
+      box-shadow: inset 0 2px 6px rgba(15, 56, 15, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lcd-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8px;
+      border-bottom: 1px dashed rgba(15, 56, 15, 0.4);
+      padding-bottom: 4px;
+    }
+
+    .lcd-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 0;
+    }
+
+    .lcd-stat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .lcd-stat-label {
+      font-size: 6px;
+      opacity: 0.85;
+    }
+
+    .lcd-stat-val {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .lcd-next-box {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #306230;
+      background: rgba(15, 56, 15, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lcd-next-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 6px);
+      grid-template-rows: repeat(4, 6px);
+      gap: 1px;
+    }
+
+    .lcd-next-cell {
+      width: 6px;
+      height: 6px;
+    }
+
+    .lcd-next-cell.filled {
+      background: #0f380f;
+      box-shadow: inset 0 0 1px #8bac0f;
+    }
+
+    .lcd-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 7px;
+      padding-top: 2px;
+      border-top: 1px dashed rgba(15, 56, 15, 0.4);
+    }
+
+    /* System Pill Buttons (Select & Start) */
+    .system-pills {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .pill-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill-btn {
+      width: 58px;
+      height: 16px;
+      background: linear-gradient(180deg, #6c7075 0%, #4b4e54 100%);
+      border-radius: 10px;
+      transform: rotate(-25deg);
+      box-shadow: 0 3px 0 #282a2e, 0 4px 5px rgba(0,0,0,0.3);
+      cursor: pointer;
+      touch-action: none;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+      margin-bottom: 6px;
+    }
+
+    .pill-btn:active, .pill-btn.pressed {
+      transform: rotate(-25deg) translateY(2px);
+      box-shadow: 0 1px 0 #282a2e, 0 2px 3px rgba(0,0,0,0.4);
+      background: #3b3d42;
+    }
+
+    .pill-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: var(--accent-blue);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* Right Zone: Angled A & B Action Buttons */
+    .action-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .action-housing {
+      width: 210px;
+      height: 110px;
+      position: relative;
+      background: radial-gradient(circle, #b5b3aa 0%, #a4a298 100%);
+      border-radius: 55px;
+      transform: rotate(-25deg);
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.25), 0 2px 5px rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 14px;
+    }
+
+    .action-btn-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transform: rotate(25deg);
+    }
+
+    .action-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #b82a5c 0%, var(--btn-magenta) 50%, #681333 100%);
+      box-shadow: 0 6px 0 #4a0d24, 0 8px 8px rgba(0,0,0,0.35), inset 0 2px 2px rgba(255,255,255,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+    }
+
+    .action-btn:active, .action-btn.pressed {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #4a0d24, 0 3px 4px rgba(0,0,0,0.5), inset 0 1px 2px rgba(0,0,0,0.6);
+      background: radial-gradient(circle at 50% 50%, var(--btn-magenta-active) 0%, #4a0d24 100%);
+    }
+
+    .action-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--accent-magenta);
+      font-weight: 800;
+      margin-top: 2px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    }
+
+    /* Bottom Speaker Grille */
+    .speaker-grille {
+      position: absolute;
+      bottom: 12px;
+      right: 28px;
+      display: flex;
+      gap: 7px;
+      transform: rotate(-25deg);
+      opacity: 0.65;
+    }
+
+    .speaker-slot {
+      width: 5px;
+      height: 38px;
+      background: #8b8981;
+      border-radius: 3px;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.6), 0 1px 1px rgba(255,255,255,0.4);
+    }
+
+    /* Modal for Room Code Input if not supplied */
+    #room-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 15, 25, 0.95);
+      z-index: 8888;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .modal-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      margin-bottom: 12px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      text-align: center;
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 8px;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      background: #0284c7;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Orientation Enforcement Overlay -->
+  <div id="rotate-overlay">
+    <svg class="rotate-phone-icon" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+      <line x1="12" y1="18" x2="12.01" y2="18"></line>
+    </svg>
+    <div class="rotate-title">ROTATE PHONE</div>
+    <div class="rotate-desc">Turn your phone sideways into landscape mode to activate the PocketPad controller!</div>
+  </div>
+
+  <!-- Room Code Prompt Modal (if URL missing room) -->
+  <div id="room-modal">
+    <div class="modal-card">
+      <div class="modal-title">CONNECT TO TETRIS</div>
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">Enter the 4-character Room Code shown on your Chromebook screen:</p>
+      <input type="text" id="room-input" class="modal-input" maxlength="8" placeholder="PAD-XXXX">
+      <button class="modal-btn" onclick="submitRoomCode()">CONNECT</button>
+    </div>
+  </div>
+
+  <!-- Gamepad Handheld Body -->
+  <div id="gamepad-container">
+    <!-- Top Branding Strip -->
+    <div class="top-strip">
+      <div class="brand-marks">
+        <span class="brand-logo">POCKETPAD</span>
+        <span class="brand-sub">HORIZON EDITION</span>
+      </div>
+      <div class="top-actions">
+        <div class="status-badge">
+          <div id="status-dot" class="status-dot"></div>
+          <span id="status-text">CONNECTING</span>
+        </div>
+        <button id="haptic-toggle" class="haptic-btn" onclick="toggleHaptics()">VIB: ON</button>
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ FULL</button>
+      </div>
+    </div>
+
+    <!-- Ergonomic Handheld Control Deck -->
+    <div class="control-deck">
+      
+      <!-- Left: Cross D-Pad -->
+      <div class="dpad-zone">
+        <div class="dpad-housing">
+          <div class="dpad">
+            <div id="btn-up" class="dpad-btn dpad-up" data-btn="UP">
+              <div class="dpad-arrow"></div>
+            </div>
+            <div id="btn-right" class="dpad-btn dpad-right" data-btn="RIGHT">
+              <div class="dpad-arrow"></div>
+            </div>
+            <div id="btn-down" class="dpad-btn dpad-down" data-btn="DOWN">
+              <div class="dpad-arrow"></div>
+            </div>
+            <div id="btn-left" class="dpad-btn dpad-left" data-btn="LEFT">
+              <div class="dpad-arrow"></div>
+            </div>
+            <div class="dpad-center"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Retro LCD HUD & Pill Controls -->
+      <div class="center-zone">
+        <div class="lcd-bezel">
+          <div class="bezel-top-lines">
+            <span class="bezel-text">HORIZON LINK</span>
+            <div class="bezel-line"></div>
+            <div class="bezel-line blue"></div>
+            <span class="bezel-text">PIXEL 3</span>
+          </div>
+          <div class="lcd-screen">
+            <div class="lcd-header">
+              <span id="lcd-room">ROOM: ----</span>
+              <span id="lcd-ping">PING: --ms</span>
+            </div>
+            <div class="lcd-body">
+              <div class="lcd-stat-box">
+                <span class="lcd-stat-label">SCORE</span>
+                <span id="lcd-score" class="lcd-stat-val">000000</span>
+              </div>
+              <div class="lcd-stat-box">
+                <span class="lcd-stat-label">LINES</span>
+                <span id="lcd-lines" class="lcd-stat-val">000</span>
+              </div>
+              <div class="lcd-next-box">
+                <div id="lcd-next-grid" class="lcd-next-grid">
+                  <!-- 4x4 next piece preview -->
+                </div>
+              </div>
+            </div>
+            <div class="lcd-footer">
+              <span id="lcd-level">LVL: 01</span>
+              <span id="lcd-conduit">CONDUIT: WEBRTC</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start & Select Pills -->
+        <div class="system-pills">
+          <div class="pill-group">
+            <div id="btn-select" class="pill-btn" data-btn="SELECT"></div>
+            <span class="pill-label">HOLD</span>
+          </div>
+          <div class="pill-group">
+            <div id="btn-start" class="pill-btn" data-btn="START"></div>
+            <span class="pill-label">PAUSE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Angled Action Buttons -->
+      <div class="action-zone">
+        <div class="action-housing">
+          <div class="action-btn-wrapper">
+            <div id="btn-b" class="action-btn" data-btn="B"></div>
+            <span class="action-label">B (CCW)</span>
+          </div>
+          <div class="action-btn-wrapper">
+            <div id="btn-a" class="action-btn" data-btn="A"></div>
+            <span class="action-label">A (CW)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Right Corner Acoustic Grille -->
+      <div class="speaker-grille">
+        <div class="speaker-slot"></div>
+        <div class="speaker-slot"></div>
+        <div class="speaker-slot"></div>
+        <div class="speaker-slot"></div>
+        <div class="speaker-slot"></div>
+        <div class="speaker-slot"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Configuration & State
+    let roomCode = '';
+    let peer = null;
+    let conn = null;
+    let supabaseClient = null;
+    let supabaseChannel = null;
+    let isConnected = false;
+    let hapticsEnabled = true;
+    let lastPingTime = 0;
+    let currentPing = 0;
+    let dasTimers = {};
+
+    // Supabase project credentials for fallback relay
+    const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
+
+    // Piece matrices for 4x4 next piece LCD preview
+    const PIECE_SHAPES = {
+      'I': [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+      'O': [[0,1,1,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
+      'T': [[0,1,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+      'S': [[0,1,1,0],[1,1,0,0],[0,0,0,0],[0,0,0,0]],
+      'Z': [[1,1,0,0],[0,1,1,0],[0,0,0,0],[0,0,0,0]],
+      'J': [[1,0,0,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]],
+      'L': [[0,0,1,0],[1,1,1,0],[0,0,0,0],[0,0,0,0]]
+    };
+
+    function initLCDGrid() {
+      const grid = document.getElementById('lcd-next-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'lcd-next-cell';
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderNextPieceLCD(type) {
+      const grid = document.getElementById('lcd-next-grid');
+      const cells = grid.children;
+      for (let i = 0; i < 16; i++) {
+        cells[i].classList.remove('filled');
+      }
+      const shape = PIECE_SHAPES[type];
+      if (!shape) return;
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (shape[r][c]) {
+            cells[r * 4 + c].classList.add('filled');
+          }
+        }
+      }
+    }
+
+    // Parse URL room parameter
+    function parseRoom() {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('room');
+      if (r && r.trim().length > 0) {
+        roomCode = r.trim().toUpperCase();
+        document.getElementById('lcd-room').textContent = 'ROOM: ' + roomCode;
+        initConduits();
+      } else {
+        document.getElementById('room-modal').style.display = 'flex';
+      }
+    }
+
+    function submitRoomCode() {
+      const input = document.getElementById('room-input');
+      if (input.value.trim().length > 0) {
+        roomCode = input.value.trim().toUpperCase();
+        document.getElementById('room-modal').style.display = 'none';
+        document.getElementById('lcd-room').textContent = 'ROOM: ' + roomCode;
+        initConduits();
+      }
+    }
+
+    // Haptics Engine
+    function triggerHaptic(duration = 20) {
+      if (!hapticsEnabled) return;
+      if ('vibrate' in navigator) {
+        try {
+          navigator.vibrate(duration);
+        } catch (e) {}
+      }
+    }
+
+    function toggleHaptics() {
+      hapticsEnabled = !hapticsEnabled;
+      const btn = document.getElementById('haptic-toggle');
+      btn.textContent = hapticsEnabled ? 'VIB: ON' : 'VIB: OFF';
+      if (hapticsEnabled) triggerHaptic(30);
+    }
+
+    // Screen Wake Lock & Fullscreen
+    async function requestWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          await navigator.wakeLock.request('screen');
+        } catch (e) {}
+      }
+    }
+
+    function toggleFullscreen() {
+      triggerHaptic(20);
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    // Conduit Setup (WebRTC DataChannel + Supabase Fallback)
+    function initConduits() {
+      document.getElementById('status-text').textContent = 'PAIRING...';
+      initWebRTC();
+      initSupabase();
+      requestWakeLock();
+    }
+
+    function initWebRTC() {
+      try {
+        peer = new Peer();
+        
+        peer.on('open', (id) => {
+          console.log('[PocketPad] Local peer initialized:', id);
+          connectToHostPeer();
+        });
+
+        peer.on('error', (err) => {
+          console.warn('[PocketPad] PeerJS warning/error:', err);
+          document.getElementById('lcd-conduit').textContent = 'CONDUIT: SUPABASE';
+        });
+      } catch (err) {
+        console.error('[PocketPad] WebRTC init error:', err);
+      }
+    }
+
+    function connectToHostPeer() {
+      if (!peer || !roomCode) return;
+      const hostPeerId = 'horizon-tetris-' + roomCode;
+      console.log('[PocketPad] Connecting to host peer:', hostPeerId);
+      
+      conn = peer.connect(hostPeerId, { reliable: true });
+
+      conn.on('open', () => {
+        console.log('[PocketPad] WebRTC DataChannel OPEN to host!');
+        setConnected(true, 'WEBRTC P2P');
+        startPingHeartbeat();
+      });
+
+      conn.on('data', (data) => {
+        handleIncomingData(data);
+      });
+
+      conn.on('close', () => {
+        console.log('[PocketPad] WebRTC DataChannel closed');
+        if (isConnected) setConnected(false);
+      });
+    }
+
+    function initSupabase() {
+      try {
+        if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+          supabaseChannel = supabaseClient.channel('tetris_' + roomCode);
+
+          supabaseChannel
+            .on('broadcast', { event: 'game_state' }, ({ payload }) => {
+              handleIncomingData(payload);
+            })
+            .on('broadcast', { event: 'pong' }, ({ payload }) => {
+              if (lastPingTime > 0) {
+                currentPing = Math.round(Date.now() - lastPingTime);
+                document.getElementById('lcd-ping').textContent = 'PING: ' + currentPing + 'ms';
+              }
+            })
+            .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                console.log('[PocketPad] Supabase Realtime conduit active');
+                if (!conn || !conn.open) {
+                  setConnected(true, 'SUPABASE');
+                }
+              }
+            });
+        }
+      } catch (err) {
+        console.warn('[PocketPad] Supabase fallback init warning:', err);
+      }
+    }
+
+    function setConnected(status, conduitName = 'WEBRTC') {
+      isConnected = status;
+      const dot = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+      const lcdConduit = document.getElementById('lcd-conduit');
+
+      if (status) {
+        dot.classList.add('connected');
+        text.textContent = 'CONNECTED';
+        lcdConduit.textContent = 'CONDUIT: ' + conduitName;
+        triggerHaptic([30, 50, 30]);
+      } else {
+        dot.classList.remove('connected');
+        text.textContent = 'SEARCHING';
+      }
+    }
+
+    function startPingHeartbeat() {
+      setInterval(() => {
+        if (conn && conn.open) {
+          lastPingTime = Date.now();
+          conn.send({ type: 'ping', time: lastPingTime });
+        }
+      }, 2000);
+    }
+
+    function handleIncomingData(data) {
+      if (!data) return;
+      if (data.type === 'pong' && data.time) {
+        currentPing = Math.round(Date.now() - data.time);
+        document.getElementById('lcd-ping').textContent = 'PING: ' + currentPing + 'ms';
+      } else if (data.type === 'game_state') {
+        if (data.score !== undefined) {
+          document.getElementById('lcd-score').textContent = String(data.score).padStart(6, '0');
+        }
+        if (data.lines !== undefined) {
+          document.getElementById('lcd-lines').textContent = String(data.lines).padStart(3, '0');
+        }
+        if (data.level !== undefined) {
+          document.getElementById('lcd-level').textContent = 'LVL: ' + String(data.level).padStart(2, '0');
+        }
+        if (data.next) {
+          renderNextPieceLCD(data.next);
+        }
+      }
+    }
+
+    // Send Input Event to Host Game
+    function dispatchButtonInput(btn, state) {
+      const payload = {
+        type: 'btn_input',
+        btn: btn,
+        state: state, // 'down' or 'up'
+        timestamp: Date.now()
+      };
+
+      if (state === 'down') {
+        triggerHaptic(btn === 'UP' ? 30 : 18);
+      }
+
+      if (conn && conn.open) {
+        conn.send(payload);
+      } else if (supabaseChannel) {
+        supabaseChannel.send({
+          type: 'broadcast',
+          event: 'btn_input',
+          payload: payload
+        });
+      }
+    }
+
+    // Touch Event Handlers with Zero-Delay Multi-Touch
+    function setupTouchControls() {
+      const buttons = document.querySelectorAll('[data-btn]');
+
+      buttons.forEach(el => {
+        const btnId = el.getAttribute('data-btn');
+
+        // Touch Start
+        el.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          el.classList.add('pressed');
+          dispatchButtonInput(btnId, 'down');
+
+          // Delayed Auto Shift (DAS) for left/right prongs
+          if (btnId === 'LEFT' || btnId === 'RIGHT' || btnId === 'DOWN') {
+            clearInterval(dasTimers[btnId]);
+            dasTimers[btnId] = setTimeout(() => {
+              dasTimers[btnId] = setInterval(() => {
+                dispatchButtonInput(btnId, 'down');
+              }, 40);
+            }, 140);
+          }
+        }, { passive: false });
+
+        // Touch End
+        el.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          el.classList.remove('pressed');
+          if (dasTimers[btnId]) {
+            clearTimeout(dasTimers[btnId]);
+            clearInterval(dasTimers[btnId]);
+            delete dasTimers[btnId];
+          }
+          dispatchButtonInput(btnId, 'up');
+        }, { passive: false });
+
+        // Touch Cancel
+        el.addEventListener('touchcancel', (e) => {
+          e.preventDefault();
+          el.classList.remove('pressed');
+          if (dasTimers[btnId]) {
+            clearTimeout(dasTimers[btnId]);
+            clearInterval(dasTimers[btnId]);
+            delete dasTimers[btnId];
+          }
+          dispatchButtonInput(btnId, 'up');
+        }, { passive: false });
+
+        // Desktop mouse support for local testing
+        el.addEventListener('mousedown', (e) => {
+          el.classList.add('pressed');
+          dispatchButtonInput(btnId, 'down');
+        });
+
+        el.addEventListener('mouseup', (e) => {
+          el.classList.remove('pressed');
+          dispatchButtonInput(btnId, 'up');
+        });
+
+        el.addEventListener('mouseleave', (e) => {
+          if (el.classList.contains('pressed')) {
+            el.classList.remove('pressed');
+            dispatchButtonInput(btnId, 'up');
+          }
+        });
+      });
+    }
+
+    // Prevent pinch-to-zoom and unwanted scrolling gestures
+    document.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      initLCDGrid();
+      parseRoom();
+      setupTouchControls();
+    });
+  </script>
+</body>
+</html>
