@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Artifact 80: Horizon Game Boy Emulator & Retro Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="vendor/peerjs.min.js"></script>
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="vendor/supabase.js"></script>
+  <script src="vendor/binjgb.js"></script>
+  <script src="vendor/emulator-core.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: rgba(18, 24, 38, 0.85);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --accent-cyan: #38bdf8;
+      --accent-magenta: #ec4899;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --gb-chassis: #d5d3cb;
+      --gb-chassis-dark: #b8b5ac;
+      --gb-chassis-light: #e8e6df;
+      --gb-bezel: #545863;
+      --gb-bezel-inner: #2b2e38;
+      --gb-lcd-dmg: #8ba324;
+      --btn-magenta: #9e1b4c;
+      --btn-magenta-active: #781036;
+      --btn-dpad: #2b2b2e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+        linear-gradient(to bottom, #090c12, #0d121c);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(10, 13, 20, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #fff;
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #fff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .conduit-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      color: #e2e8f0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.connected {
+      background: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.9);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    .pair-btn {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .pair-btn:hover {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Showcase Collapsible */
+    .hero-banner {
+      width: 100%;
+      max-width: 1400px;
+      margin: 16px auto 0;
+      padding: 0 20px;
+    }
+
+    .hero-card {
+      position: relative;
+      height: 190px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      filter: brightness(0.65) contrast(1.1);
+      transition: transform 0.5s ease;
+    }
+
+    .hero-card:hover .hero-bg-img {
+      transform: scale(1.02);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(10,13,20,0.92) 0%, rgba(10,13,20,0.65) 55%, rgba(10,13,20,0.3) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 32px;
+      max-width: 720px;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .hero-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      width: 100%;
+      max-width: 1440px;
+      margin: 16px auto;
+      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1120px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Stage: Game Boy Screen Bezel (DOMINATING DISPLAY) */
+    .stage-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* Game Boy Shell Exterior */
+    .gameboy-console {
+      width: 100%;
+      max-width: 760px;
+      background: radial-gradient(circle at 40% 20%, var(--gb-chassis-light) 0%, var(--gb-chassis) 70%, var(--gb-chassis-dark) 100%);
+      border-radius: 28px 28px 48px 28px;
+      box-shadow: 
+        0 24px 60px rgba(0, 0, 0, 0.7),
+        inset 0 2px 4px rgba(255, 255, 255, 0.6),
+        inset 0 -6px 12px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 24px 28px 28px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Top Shell Recessed Channel */
+    .gb-top-recess {
+      width: 90%;
+      height: 8px;
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+      box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.35), 0 1px 1px rgba(255, 255, 255, 0.4);
+      margin-bottom: 16px;
+    }
+
+    /* Game Boy Screen Bezel - Dominated Viewport */
+    .gb-bezel {
+      width: 100%;
+      background: linear-gradient(180deg, #4d515a 0%, #3a3d46 100%);
+      border-radius: 16px 16px 36px 16px;
+      box-shadow: 
+        inset 0 3px 6px rgba(0, 0, 0, 0.5),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.15),
+        0 4px 10px rgba(0, 0, 0, 0.3);
+      padding: 18px 22px 14px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Bezel Header: Twin Stripes & Text */
+    .bezel-top-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .stripe-line {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .stripe-blue {
+      background: #1e3a8a;
+      box-shadow: 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .stripe-magenta {
+      background: #9d174d;
+      margin-top: 2px;
+      height: 3px;
+    }
+
+    .bezel-brand-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 1.5px;
+      padding: 0 12px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      white-space: nowrap;
+    }
+
+    /* LCD Screen Display Area */
+    .screen-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 160 / 144;
+      background-color: var(--gb-lcd-dmg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 
+        inset 0 4px 12px rgba(0, 0, 0, 0.6),
+        0 1px 2px rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gb-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+
+    /* Dot-Matrix LCD Overlay */
+    .lcd-grid-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: 
+        linear-gradient(rgba(0,0,0,0.06) 50%, transparent 50%),
+        linear-gradient(90deg, rgba(0,0,0,0.06) 50%, transparent 50%);
+      background-size: 4px 4px;
+      opacity: 0.6;
+      transition: opacity 0.3s;
+    }
+
+    .lcd-grid-overlay.off {
+      opacity: 0;
+    }
+
+    /* Screen Splash State */
+    .screen-splash {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(4px);
+      z-index: 5;
+      padding: 24px;
+      text-align: center;
+      transition: opacity 0.3s;
+    }
+
+    .screen-splash.hidden {
+      display: none;
+    }
+
+    .splash-logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      color: #38bdf8;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+    }
+
+    .splash-instructions {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+      max-width: 380px;
+      margin-bottom: 16px;
+    }
+
+    .quick-start-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+    }
+
+    .quick-start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Left Indicator: Battery LED */
+    .battery-led-group {
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .battery-led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #7f1d1d;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+      transition: all 0.3s;
+    }
+
+    .battery-led.on {
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444, inset 0 1px 1px #fff;
+    }
+
+    .battery-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      color: #94a3b8;
+      letter-spacing: 1px;
+    }
+
+    /* Bezel Footer: Logo */
+    .bezel-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-top: 10px;
+      padding: 0 8px;
+    }
+
+    .nintendo-logo {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-style: italic;
+      font-size: 15px;
+      letter-spacing: -0.5px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .gb-text {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #1e3a8a;
+    }
+
+    .gb-color-accent {
+      font-size: 13px;
+      font-weight: 800;
+      margin-left: 2px;
+      background: linear-gradient(90deg, #ef4444, #eab308, #22c55e, #3b82f6, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Lower Game Boy Shell Area: Speaker Grille & Minimal Controls */
+    .gb-lower-deck {
+      width: 100%;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+    }
+
+    .minimal-buttons {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Tactile D-pad Graphic (interactive fallback) */
+    .mini-dpad {
+      width: 90px;
+      height: 90px;
+      position: relative;
+    }
+
+    .mini-dpad-btn {
+      position: absolute;
+      background: #2b2b2e;
+      border: 1px solid #1a1a1c;
+      box-shadow: 0 2px 0 #111, inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.05s;
+    }
+
+    .mini-dpad-btn:active, .mini-dpad-btn.lit {
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      transform: scale(0.95);
+    }
+
+    .mini-dpad-btn.up { top: 0; left: 30px; width: 30px; height: 30px; border-radius: 4px 4px 0 0; }
+    .mini-dpad-btn.down { bottom: 0; left: 30px; width: 30px; height: 30px; border-radius: 0 0 4px 4px; }
+    .mini-dpad-btn.left { top: 30px; left: 0; width: 30px; height: 30px; border-radius: 4px 0 0 4px; }
+    .mini-dpad-btn.right { top: 30px; right: 0; width: 30px; height: 30px; border-radius: 0 4px 4px 0; }
+    .mini-dpad-center { position: absolute; top: 30px; left: 30px; width: 30px; height: 30px; background: #2b2b2e; }
+
+    /* Minimal Action Buttons */
+    .mini-action-group {
+      display: flex;
+      gap: 12px;
+      transform: rotate(-25deg);
+    }
+
+    .mini-action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #b01a55, #83103c);
+      box-shadow: 0 3px 0 #4a0921, 0 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      transition: all 0.05s;
+    }
+
+    .mini-action-btn:active, .mini-action-btn.lit {
+      box-shadow: 0 1px 0 #4a0921, 0 0 12px #ec4899;
+      transform: translateY(2px);
+      background: #ec4899;
+    }
+
+    /* System Pills: Select & Start */
+    .mini-pills {
+      display: flex;
+      gap: 10px;
+    }
+
+    .mini-pill-btn {
+      width: 44px;
+      height: 12px;
+      background: #73777d;
+      border-radius: 6px;
+      transform: rotate(-25deg);
+      cursor: pointer;
+      box-shadow: 0 2px 0 #3f4247;
+      position: relative;
+    }
+
+    .mini-pill-btn:active, .mini-pill-btn.lit {
+      transform: rotate(-25deg) translateY(1px);
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+    }
+
+    .mini-pill-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px;
+      font-weight: 700;
+      color: #1e3a8a;
+      letter-spacing: 0.5px;
+    }
+
+    /* Speaker Louvers */
+    .speaker-grille {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transform: rotate(-25deg);
+    }
+
+    .speaker-slot {
+      width: 50px;
+      height: 4px;
+      background: #111;
+      border-radius: 2px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 1px 1px rgba(255,255,255,0.4);
+    }
+
+    /* Emulator Quick Toolbar */
+    .controls-toolbar {
+      width: 100%;
+      max-width: 760px;
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .tool-select {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .fps-display {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    /* Right Sidebar: PocketPad Controller Pairing + Cartridge Vault */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      letter-spacing: -0.2px;
+    }
+
+    /* PocketPad QR Card */
+    .pairing-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .qr-frame {
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .room-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: #38bdf8;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .pairing-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .copy-url-btn {
+      width: 100%;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #38bdf8;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-url-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+    }
+
+    /* Telemetry Diagnostics */
+    .telemetry-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    .telemetry-row:last-child {
+      border-bottom: none;
+    }
+
+    .telemetry-label {
+      color: #64748b;
+    }
+
+    .telemetry-val {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* Cartridge Library Rack */
+    .cartridge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .cartridge-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .cartridge-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+    }
+
+    .cart-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .cart-card:hover {
+      background: rgba(56, 189, 248, 0.08);
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateX(3px);
+    }
+
+    .cart-card.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    .cart-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .cart-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cart-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cart-meta {
+      font-size: 10px;
+      color: #94a3b8;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .cart-genre-tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 9px;
+    }
+
+    /* Custom ROM Upload Dropzone */
+    .dropzone {
+      margin-top: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .dropzone-text {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 4px;
+    }
+
+    .dropzone-sub {
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    /* Fullscreen Modal for Controller QR Code */
+    #qr-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-card {
+      background: #111827;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #94a3b8;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header>
+    <div class="nav-left">
+      <a href="index.html" class="back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        PocketPad Suite
+      </a>
+      <div class="header-titles">
+        <div class="brand-title">Horizon Game Boy Vault</div>
+        <div class="brand-sub">ARTIFACT 80 • CYCLE-ACCURATE WASM • WEBRTC CONDUIT</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="conduit-status-pill">
+        <div id="status-dot" class="status-dot"></div>
+        <span id="status-text">WAITING FOR PHONE</span>
+      </div>
+      <button class="pair-btn" id="open-pair-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Scan QR Code
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-card">
+      <img src="images/artifact_80_hero.jpg" alt="Horizon Game Boy Hero" class="hero-bg-img">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">SESSION 168 SANCTUARY ENGINE</span>
+        <h1 class="hero-heading">The Sovereign Game Boy Engine</h1>
+        <p class="hero-desc">
+          A cycle-accurate WebAssembly Game Boy & Game Boy Color recreation framed in authentic DMG hardware aesthetics. Wirelessly paired to Christopher's Google Pixel 3 PocketPad with sub-2ms WebRTC latency and 10 vetted homebrew classics.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="workspace">
+
+    <!-- Center Stage: The Game Boy Screen (DOMINATING DISPLAY) -->
+    <div class="stage-container">
+      <div class="gameboy-console">
+        <!-- Top Recess -->
+        <div class="gb-top-recess"></div>
+
+        <!-- The Iconic Screen Bezel -->
+        <div class="gb-bezel">
+          <!-- Battery LED -->
+          <div class="battery-led-group">
+            <div id="battery-led" class="battery-led on"></div>
+            <div class="battery-text">BATTERY</div>
+          </div>
+
+          <!-- Bezel Top Strip with Stripes -->
+          <div class="bezel-top-strip">
+            <div class="stripe-line stripe-magenta"></div>
+            <div class="stripe-line stripe-blue"></div>
+            <div class="bezel-brand-text">DOT MATRIX WITH STEREO SOUND</div>
+            <div class="stripe-line stripe-blue"></div>
+            <div class="stripe-line stripe-magenta"></div>
+          </div>
+
+          <!-- Screen Stage (Dominant Canvas) -->
+          <div class="screen-stage">
+            <canvas id="gb-canvas" width="160" height="144"></canvas>
+            <div id="lcd-grid" class="lcd-grid-overlay"></div>
+
+            <!-- Splash Overlay -->
+            <div id="screen-splash" class="screen-splash">
+              <div class="splash-logo">HORIZON GB</div>
+              <p class="splash-instructions">
+                Select any classic game cartridge from the library or tap below to launch. Connect your Pixel 3 controller for tactile handheld immersion!
+              </p>
+              <button id="splash-start-btn" class="quick-start-btn">INSERT CARTRIDGE</button>
+            </div>
+          </div>
+
+          <!-- Bezel Footer Logo -->
+          <div class="bezel-bottom">
+            <div class="nintendo-logo">
+              Horizon <span class="gb-text">GAME BOY</span><span class="gb-color-accent">COLOR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Minimal Lower Deck Elements -->
+        <div class="gb-lower-deck">
+          <!-- Interactive D-Pad Graphic (Lights up when Pixel 3 touches) -->
+          <div class="mini-dpad">
+            <div id="btn-up" class="mini-dpad-btn up"></div>
+            <div id="btn-down" class="mini-dpad-btn down"></div>
+            <div id="btn-left" class="mini-dpad-btn left"></div>
+            <div id="btn-right" class="mini-dpad-btn right"></div>
+            <div class="mini-dpad-center"></div>
+          </div>
+
+          <!-- System Select & Start Pills -->
+          <div class="mini-pills">
+            <div id="btn-select" class="mini-pill-btn">
+              <span class="mini-pill-label">SELECT</span>
+            </div>
+            <div id="btn-start" class="mini-pill-btn">
+              <span class="mini-pill-label">START</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons (A & B) -->
+          <div class="mini-action-group">
+            <div id="btn-b" class="mini-action-btn">B</div>
+            <div id="btn-a" class="mini-action-btn">A</div>
+          </div>
+
+          <!-- Speaker Grille -->
+          <div class="speaker-grille">
+            <div class="speaker-slot"></div>
+            <div class="speaker-slot"></div>
+            <div class="speaker-slot"></div>
+            <div class="speaker-slot"></div>
+            <div class="speaker-slot"></div>
+            <div class="speaker-slot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Control Toolbar -->
+      <div class="controls-toolbar">
+        <div class="toolbar-group">
+          <button id="pause-btn" class="tool-btn">⏸️ Pause</button>
+          <button id="save-btn" class="tool-btn" title="Quick Save (F6)">💾 Save</button>
+          <button id="load-btn" class="tool-btn" title="Quick Load (F9)">📂 Load</button>
+          <button id="mute-btn" class="tool-btn">🔊 Sound</button>
+          <button id="fullscreen-btn" class="tool-btn">⛶ Fullscreen</button>
+        </div>
+
+        <div class="toolbar-group">
+          <label style="font-size: 11px; color: #94a3b8;">Palette:</label>
+          <select id="palette-select" class="tool-select">
+            <option value="0">DMG Classic Green</option>
+            <option value="1">Game Boy Pocket (B&W)</option>
+            <option value="2">Game Boy Light (Teal)</option>
+            <option value="3">Super Game Boy 1</option>
+            <option value="14">Sunset Amber CRT</option>
+            <option value="22">Cyberpunk Neon</option>
+            <option value="50">Emerald Forest</option>
+          </select>
+
+          <label style="font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <input type="checkbox" id="lcd-grid-toggle" checked> LCD Grid
+          </label>
+
+          <div class="fps-display"><span id="fps-num">60</span> FPS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="sidebar">
+
+      <!-- PocketPad Controller Connection Chamber -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>Pixel 3 PocketPad</span>
+          <span style="font-size: 10px; color: var(--accent-cyan); font-family: 'Share Tech Mono', monospace;">SUB-2ms WEBRTC</span>
+        </div>
+
+        <div class="pairing-box">
+          <div class="room-badge" id="room-code-display">GB-....</div>
+          <div class="qr-frame" id="sidebar-qrcode"></div>
+          <p class="pairing-sub">
+            Scan with your Google Pixel 3 to connect the tactile handheld controller instantly.
+          </p>
+          <button class="copy-url-btn" id="copy-controller-link">📋 Copy Controller Link</button>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div class="telemetry-row">
+            <span class="telemetry-label">Conduit State</span>
+            <span class="telemetry-val" id="tele-status">SEARCHING</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">Latency Ping</span>
+            <span class="telemetry-val" id="tele-ping">-- ms</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">Active ROM</span>
+            <span class="telemetry-val" id="tele-rom" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">Tobu Tobu Girl</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">Keyboard Controls</span>
+            <span class="telemetry-val" style="color: #94a3b8;">Arrows / Z / X / Enter</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curated Cartridge Library -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>Cartridge Vault</span>
+          <span style="font-size: 10px; color: var(--accent-magenta);">10 CLASSICS</span>
+        </div>
+
+        <div class="cartridge-list" id="cartridge-list">
+          <!-- Dynamically populated from BUILTIN_ROMS -->
+        </div>
+
+        <!-- Custom ROM Upload Dropzone -->
+        <div class="dropzone" id="rom-dropzone">
+          <input type="file" id="rom-file-input" accept=".gb,.gbc" style="display: none;">
+          <div class="dropzone-text">📂 Insert Custom Cartridge</div>
+          <div class="dropzone-sub">Drag & drop or click to browse any .gb / .gbc ROM</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Large QR Modal for Quick Phone Camera Scan -->
+  <div id="qr-modal">
+    <div class="modal-card">
+      <button class="close-modal-btn" id="close-qr-modal">✕</button>
+      <h3 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 8px;">Scan with Google Pixel 3</h3>
+      <div class="room-badge" id="modal-room-code" style="margin-bottom: 12px;">GB-....</div>
+      <div class="qr-frame" id="modal-qrcode" style="width: 220px; height: 220px; margin: 0 auto 16px;"></div>
+      <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 16px;">
+        Point your Pixel 3 camera at this code. The PocketPad handheld touch controller will pair automatically with zero install.
+      </p>
+      <button class="quick-start-btn" id="modal-done-btn" style="width: 100%;">Done</button>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Horizon Game Boy Instance
+    const gb = new HorizonGameBoy({
+      canvas: document.getElementById('gb-canvas'),
+      wasmPath: 'vendor/binjgb.wasm',
+      onStatusChange: (status) => {
+        console.log('[Status]', status);
+      },
+      onFrame: ({ fps }) => {
+        document.getElementById('fps-num').textContent = fps;
+      },
+      onButtonEvent: (btn, isDown) => {
+        updateVisualButton(btn, isDown);
+      }
+    });
+
+    let currentRoomCode = '';
+    let hostPeer = null;
+    let peerConn = null;
+    let supabaseClient = null;
+    let supabaseChannel = null;
+    let activeRomId = 'tobu';
+
+    // Highlight on-screen visual buttons
+    function updateVisualButton(btn, isDown) {
+      const map = {
+        'UP': 'btn-up',
+        'DOWN': 'btn-down',
+        'LEFT': 'btn-left',
+        'RIGHT': 'btn-right',
+        'A': 'btn-a',
+        'B': 'btn-b',
+        'START': 'btn-start',
+        'SELECT': 'btn-select'
+      };
+      const elId = map[btn];
+      if (elId) {
+        const el = document.getElementById(elId);
+        if (el) {
+          if (isDown) el.classList.add('lit');
+          else el.classList.remove('lit');
+        }
+      }
+    }
+
+    // Attach click events to minimal on-screen buttons
+    function setupOnscreenControls() {
+      const btnMap = {
+        'btn-up': 'UP',
+        'btn-down': 'DOWN',
+        'btn-left': 'LEFT',
+        'btn-right': 'RIGHT',
+        'btn-a': 'A',
+        'btn-b': 'B',
+        'btn-start': 'START',
+        'btn-select': 'SELECT'
+      };
+
+      for (const [id, key] of Object.entries(btnMap)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+
+        const press = (e) => {
+          e.preventDefault();
+          gb.setButton(key, true);
+        };
+        const release = (e) => {
+          e.preventDefault();
+          gb.setButton(key, false);
+        };
+
+        el.addEventListener('mousedown', press);
+        el.addEventListener('mouseup', release);
+        el.addEventListener('mouseleave', release);
+        el.addEventListener('touchstart', press, { passive: false });
+        el.addEventListener('touchend', release, { passive: false });
+      }
+    }
+
+    // Render Built-in Cartridge Vault List
+    function renderCartridgeList() {
+      const listEl = document.getElementById('cartridge-list');
+      listEl.innerHTML = '';
+
+      BUILTIN_ROMS.forEach((rom) => {
+        const card = document.createElement('div');
+        card.className = `cart-card ${rom.id === activeRomId ? 'active' : ''}`;
+        card.id = `cart-${rom.id}`;
+        card.innerHTML = `
+          <div class="cart-icon-box" style="border-left: 3px solid ${rom.color};">
+            ${rom.icon}
+          </div>
+          <div class="cart-details">
+            <div class="cart-title">${rom.title}</div>
+            <div class="cart-meta">
+              <span>${rom.year}</span> • <span>${rom.developer}</span>
+              <span class="cart-genre-tag">${rom.genre}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          selectAndPlayRom(rom);
+        });
+
+        listEl.appendChild(card);
+      });
+    }
+
+    async function selectAndPlayRom(rom) {
+      activeRomId = rom.id;
+      document.querySelectorAll('.cart-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.getElementById(`cart-${rom.id}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      document.getElementById('screen-splash').classList.add('hidden');
+      document.getElementById('tele-rom').textContent = rom.title;
+
+      try {
+        await gb.loadRomFromUrl(rom.file, rom);
+      } catch (err) {
+        alert('Error loading ROM: ' + err.message);
+      }
+    }
+
+    // Generate Room Code & Pair Controller
+    function generateRoomCode() {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let code = 'GB-';
+      for (let i = 0; i < 4; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return code;
+    }
+
+    function initPairingConduit() {
+      currentRoomCode = generateRoomCode();
+      document.getElementById('room-code-display').textContent = currentRoomCode;
+      document.getElementById('modal-room-code').textContent = currentRoomCode;
+
+      // Online GitHub Pages URL (works anywhere)
+      const controllerUrl = `https://augmentedthinker.github.io/pocket-pad/controller.html?room=${currentRoomCode}&prefix=horizon-tetris-`;
+
+      // Render QR Codes
+      const sideQr = document.getElementById('sidebar-qrcode');
+      sideQr.innerHTML = '';
+      new QRCode(sideQr, {
+        text: controllerUrl,
+        width: 130,
+        height: 130,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      const modalQr = document.getElementById('modal-qrcode');
+      modalQr.innerHTML = '';
+      new QRCode(modalQr, {
+        text: controllerUrl,
+        width: 220,
+        height: 220,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      initWebRTC();
+      initSupabase();
+    }
+
+    function initWebRTC() {
+      // Connects to peer matching host ID
+      const peerId = 'horizon-tetris-' + currentRoomCode;
+      console.log('[Host] Registering WebRTC peer ID:', peerId);
+
+      try {
+        hostPeer = new Peer(peerId);
+
+        hostPeer.on('open', (id) => {
+          console.log('[Host] PeerJS listening on:', id);
+        });
+
+        hostPeer.on('connection', (conn) => {
+          console.log('[Host] Inbound WebRTC connection from PocketPad!');
+          peerConn = conn;
+
+          conn.on('open', () => {
+            setConnected(true, 'WEBRTC P2P');
+          });
+
+          conn.on('data', (data) => {
+            handleInboundInput(data);
+          });
+
+          conn.on('close', () => {
+            console.log('[Host] PocketPad disconnected');
+            setConnected(false);
+          });
+        });
+
+        hostPeer.on('error', (err) => {
+          console.warn('[Host] PeerJS error:', err);
+        });
+      } catch (e) {
+        console.error('[Host] PeerJS init error:', e);
+      }
+    }
+
+    function initSupabase() {
+      const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
+
+      try {
+        if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+          supabaseChannel = supabaseClient.channel('tetris_' + currentRoomCode);
+
+          supabaseChannel
+            .on('broadcast', { event: 'btn_input' }, ({ payload }) => {
+              if (!peerConn || !peerConn.open) {
+                handleInboundInput(payload);
+              }
+            })
+            .on('broadcast', { event: 'ping' }, ({ payload }) => {
+              supabaseChannel.send({
+                type: 'broadcast',
+                event: 'pong',
+                payload: { time: payload.time }
+              });
+            })
+            .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                console.log('[Host] Supabase Realtime fallback active');
+              }
+            });
+        }
+      } catch (err) {
+        console.warn('[Host] Supabase init warning:', err);
+      }
+    }
+
+    function setConnected(status, conduit = 'WEBRTC') {
+      const dot = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+      const teleStatus = document.getElementById('tele-status');
+
+      if (status) {
+        dot.classList.add('connected');
+        text.textContent = 'PIXEL 3 CONNECTED';
+        teleStatus.textContent = 'CONNECTED (' + conduit + ')';
+        teleStatus.style.color = '#10b981';
+      } else {
+        dot.classList.remove('connected');
+        text.textContent = 'WAITING FOR PHONE';
+        teleStatus.textContent = 'SEARCHING';
+        teleStatus.style.color = '#38bdf8';
+      }
+    }
+
+    function handleInboundInput(data) {
+      if (!data) return;
+
+      if (data.type === 'ping' && data.time) {
+        const pingMs = Date.now() - data.time;
+        document.getElementById('tele-ping').textContent = pingMs + ' ms';
+        if (peerConn && peerConn.open) {
+          peerConn.send({ type: 'pong', time: data.time });
+        }
+        return;
+      }
+
+      if (data.type === 'btn_input' && data.btn) {
+        const isDown = (data.state === 'down');
+        gb.setButton(data.btn, isDown);
+      }
+    }
+
+    // UI Event Listeners
+    function setupUI() {
+      // Splash start
+      document.getElementById('splash-start-btn').addEventListener('click', () => {
+        const firstRom = BUILTIN_ROMS[0];
+        selectAndPlayRom(firstRom);
+      });
+
+      // Pause toggle
+      document.getElementById('pause-btn').addEventListener('click', () => {
+        const isPaused = gb.togglePause();
+        document.getElementById('pause-btn').textContent = isPaused ? '▶️ Resume' : '⏸️ Pause';
+      });
+
+      // Save & Load
+      document.getElementById('save-btn').addEventListener('click', () => {
+        gb.saveQuickState();
+      });
+      document.getElementById('load-btn').addEventListener('click', () => {
+        gb.loadQuickState();
+      });
+
+      // Sound mute toggle
+      document.getElementById('mute-btn').addEventListener('click', () => {
+        gb.initAudio();
+        gb.resumeAudio();
+        gb.setMuted(!gb.isMuted);
+        document.getElementById('mute-btn').textContent = gb.isMuted ? '🔇 Muted' : '🔊 Sound';
+      });
+
+      // Palette Select
+      document.getElementById('palette-select').addEventListener('change', (e) => {
+        gb.setPalette(parseInt(e.target.value, 10));
+      });
+
+      // LCD Grid Toggle
+      document.getElementById('lcd-grid-toggle').addEventListener('change', (e) => {
+        const overlay = document.getElementById('lcd-grid');
+        if (e.target.checked) overlay.classList.remove('off');
+        else overlay.classList.add('off');
+      });
+
+      // Fullscreen
+      document.getElementById('fullscreen-btn').addEventListener('click', () => {
+        const canvas = document.getElementById('gb-canvas');
+        if (!document.fullscreenElement) {
+          canvas.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // Copy Controller Link
+      document.getElementById('copy-controller-link').addEventListener('click', () => {
+        const url = `https://augmentedthinker.github.io/pocket-pad/controller.html?room=${currentRoomCode}&prefix=horizon-tetris-`;
+        navigator.clipboard.writeText(url).then(() => {
+          const btn = document.getElementById('copy-controller-link');
+          const old = btn.textContent;
+          btn.textContent = '✅ Link Copied!';
+          setTimeout(() => btn.textContent = old, 2000);
+        });
+      });
+
+      // QR Modal
+      const modal = document.getElementById('qr-modal');
+      document.getElementById('open-pair-btn').addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+      document.getElementById('close-qr-modal').addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      document.getElementById('modal-done-btn').addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      // Custom ROM Dropzone & File Input
+      const dropzone = document.getElementById('rom-dropzone');
+      const fileInput = document.getElementById('rom-file-input');
+
+      dropzone.addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          loadCustomRomFile(e.target.files[0]);
+        }
+      });
+
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+          loadCustomRomFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    async function loadCustomRomFile(file) {
+      if (!file.name.endsWith('.gb') && !file.name.endsWith('.gbc')) {
+        alert('Please choose a valid .gb or .gbc Game Boy ROM file.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const buffer = e.target.result;
+        const romInfo = {
+          id: 'custom_' + Date.now(),
+          title: file.name.replace(/\.(gb|gbc)$/i, ''),
+          developer: 'Custom ROM',
+          year: new Date().getFullYear(),
+          genre: 'User Cartridge'
+        };
+
+        document.getElementById('screen-splash').classList.add('hidden');
+        document.getElementById('tele-rom').textContent = romInfo.title;
+
+        try {
+          await gb.loadRom(buffer, romInfo);
+        } catch (err) {
+          alert('Failed to run custom ROM: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Startup
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCartridgeList();
+      setupOnscreenControls();
+      setupUI();
+      initPairingConduit();
+    });
+  </script>
+</body>
+</html>

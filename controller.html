@@ -919,7 +919,9 @@
 
     function connectToHostPeer() {
       if (!peer || !roomCode) return;
-      const hostPeerId = 'horizon-tetris-' + roomCode;
+      const params = new URLSearchParams(window.location.search);
+      const prefix = params.get('prefix') || 'horizon-tetris-';
+      const hostPeerId = prefix + roomCode;
       console.log('[PocketPad] Connecting to host peer:', hostPeerId);
       
       conn = peer.connect(hostPeerId, { reliable: true });
@@ -944,7 +946,9 @@
       try {
         if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-          supabaseChannel = supabaseClient.channel('tetris_' + roomCode);
+          const params = new URLSearchParams(window.location.search);
+          const chPrefix = params.get('channel') || 'tetris_';
+          supabaseChannel = supabaseClient.channel(chPrefix + roomCode);
 
           supabaseChannel
             .on('broadcast', { event: 'game_state' }, ({ payload }) => {
