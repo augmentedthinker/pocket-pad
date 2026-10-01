@@ -474,6 +474,30 @@
       font-size: 9px;
       color: #64748b;
     }
+
+    .room-pill-btn {
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 6px;
+      color: var(--cyan-glow);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .room-pill-btn:active {
+      transform: scale(0.95);
+      background: rgba(0, 240, 255, 0.25);
+    }
+    .status-chip {
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -488,13 +512,17 @@
     <div class="rotate-desc">Turn sideways into landscape mode. Hold like a flight yoke to steer!</div>
   </div>
 
-  <!-- Room Code Prompt Modal (if URL missing room) -->
+  <!-- Room Code Prompt Modal (if URL missing room or manual switch) -->
   <div id="room-modal">
     <div class="modal-card">
       <div class="modal-title">CONNECT TO SIMULATOR</div>
-      <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Enter the Room Code shown on your Chromebook:</p>
-      <input type="text" id="room-input" class="modal-input" maxlength="8" placeholder="AERO-XXXX">
-      <button class="modal-btn" onclick="submitRoomCode()">LINK FLIGHT YOKE</button>
+      <p style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Enter the Room Code shown on your Chromebook:</p>
+      <div id="current-room-hint" style="font-family:var(--font-mono);font-size:10px;color:var(--cyan-glow);margin-bottom:10px;">TARGET: NONE</div>
+      <input type="text" id="room-input" class="modal-input" maxlength="12" placeholder="e.g. ZKTS or AERO-ZKTS" autocomplete="off" autocapitalize="characters">
+      <div style="display:flex;gap:8px;width:100%;margin-top:10px;">
+        <button class="modal-btn" style="flex:1;" onclick="submitRoomCode()">LINK FLIGHT YOKE</button>
+        <button class="modal-btn" id="modal-btn-cancel" style="flex:0.6;background:#334155;border-color:#475569;" onclick="closeRoomModal()">CANCEL</button>
+      </div>
     </div>
   </div>
 
@@ -512,7 +540,7 @@
         <button id="btn-pause-header" class="hdr-btn pause-btn" onclick="togglePauseRemote()">
           <span>⏸ PAUSE</span>
         </button>
-        <div class="status-chip">
+        <div class="status-chip" onclick="handleStatusClick()" title="Tap to check room or reconnect">
           <div id="status-dot" class="status-dot"></div>
           <span id="status-text">PAIRING...</span>
         </div>
@@ -580,7 +608,9 @@
       <section class="avionics-wing-right">
         <div class="wing-label">
           <span>MISSION TELEMETRY</span>
-          <span id="room-badge" style="color:var(--cyan-glow);">----</span>
+          <button id="btn-change-room" class="room-pill-btn" onclick="openRoomModal()" title="Tap to change room code">
+            <span id="room-badge">----</span> ✏️
+          </button>
         </div>
 
         <div class="telemetry-grid" style="grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px;">
@@ -678,17 +708,60 @@
         document.getElementById('room-badge').textContent = roomCode;
         initConduits();
       } else {
-        document.getElementById('room-modal').style.display = 'flex';
+        openRoomModal();
+      }
+    }
+
+    function openRoomModal() {
+      const modal = document.getElementById('room-modal');
+      const input = document.getElementById('room-input');
+      const hint = document.getElementById('current-room-hint');
+      const cancelBtn = document.getElementById('modal-btn-cancel');
+      if (hint) hint.textContent = 'CURRENT TARGET: ' + (roomCode || 'NONE');
+      if (cancelBtn) cancelBtn.style.display = roomCode ? 'block' : 'none';
+      input.value = roomCode ? roomCode.replace('AERO-', '') : '';
+      modal.style.display = 'flex';
+      setTimeout(() => input.focus(), 150);
+    }
+
+    function closeRoomModal() {
+      if (roomCode) {
+        document.getElementById('room-modal').style.display = 'none';
+      }
+    }
+
+    function handleStatusClick() {
+      if (!isConnected) {
+        openRoomModal();
       }
     }
 
     function submitRoomCode() {
       const input = document.getElementById('room-input');
-      if (input.value.trim().length > 0) {
-        roomCode = input.value.trim().toUpperCase();
-        localStorage.setItem('pocketpad_aero_room', roomCode);
-        document.getElementById('room-modal').style.display = 'none';
-        document.getElementById('room-badge').textContent = roomCode;
+      let val = input.value.trim().toUpperCase();
+      if (!val) return;
+      if (!val.startsWith('AERO-')) {
+        val = 'AERO-' + val.replace(/[^A-Z0-9]/g, '');
+      }
+      roomCode = val;
+      localStorage.setItem('pocketpad_aero_room', roomCode);
+
+      try {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('room', roomCode);
+        window.history.replaceState({}, '', newUrl.toString());
+      } catch(e){}
+
+      document.getElementById('room-modal').style.display = 'none';
+      const badge = document.getElementById('room-badge');
+      if (badge) badge.textContent = roomCode;
+
+      setConnected(false, 'PAIRING...');
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      if (conn) { try { conn.close(); } catch(e){} conn = null; }
+      if (peer && !peer.destroyed) {
+        connectToHostPeer();
+      } else {
         initConduits();
       }
     }
@@ -900,7 +973,7 @@
     function sendData(data) {
       if (conn && conn.open) {
         try { conn.send(data); } catch(e) {}
-      } else if (supabaseChannel) {
+      } else if (supabaseChannel && supabaseChannel.state === 'joined') {
         try { supabaseChannel.send({ type: 'broadcast', event: 'yoke_input', payload: data }); } catch(e) {}
       }
     }
@@ -1003,7 +1076,7 @@
 
     // Networking & Auto-Reconnect Watchdog
     function initConduits() {
-      document.getElementById('status-text').textContent = 'PAIRING...';
+      setConnected(false, 'PAIRING...');
       initWebRTC();
       initSupabase();
       initSensors();
@@ -1011,25 +1084,62 @@
 
     function initWebRTC() {
       try {
-        peer = new Peer();
+        if (peer && !peer.destroyed) {
+          try { peer.destroy(); } catch(e){}
+          peer = null;
+        }
+
+        peer = new Peer({
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+          }
+        });
 
         peer.on('open', (id) => {
+          console.log('[Phone Yoke] Peer registered:', id);
           connectToHostPeer();
         });
 
         peer.on('error', (err) => {
+          console.warn('[Phone Yoke] Peer error:', err.type, err);
+          if (err.type === 'peer-unavailable') {
+            setConnected(false, 'ROOM NOT FOUND (TAP)');
+          } else {
+            setConnected(false, 'RETRYING...');
+          }
           scheduleReconnect();
         });
-      } catch(e) {}
+      } catch(e) {
+        console.error('[Phone Yoke] WebRTC setup error:', e);
+      }
     }
 
     function connectToHostPeer() {
-      if (!peer || !roomCode) return;
+      if (!peer || peer.destroyed || !roomCode) return;
       const hostPeerId = 'horizon-aero-' + roomCode;
-      conn = peer.connect(hostPeerId, { reliable: false });
+      console.log('[Phone Yoke] Connecting to host peer:', hostPeerId);
+
+      if (conn) {
+        try { conn.close(); } catch(e){}
+        conn = null;
+      }
+
+      conn = peer.connect(hostPeerId, {
+        reliable: false,
+        serialization: 'json'
+      });
 
       conn.on('open', () => {
+        console.log('[Phone Yoke] Connected to host simulator!');
         setConnected(true, 'LINKED');
+        if (reconnectTimer) {
+          clearTimeout(reconnectTimer);
+          reconnectTimer = null;
+        }
       });
 
       conn.on('data', (data) => {
@@ -1037,34 +1147,49 @@
       });
 
       conn.on('close', () => {
-        setConnected(false);
+        conn = null;
+        setConnected(false, 'HOST OFFLINE');
+        scheduleReconnect();
+      });
+
+      conn.on('error', (err) => {
+        console.warn('[Phone Yoke] Connection warning:', err);
+        conn = null;
+        setConnected(false, 'RETRYING...');
         scheduleReconnect();
       });
     }
 
     function scheduleReconnect() {
-      if (reconnectTimer) return;
+      if (reconnectTimer || isConnected) return;
       reconnectTimer = setTimeout(() => {
         reconnectTimer = null;
-        if (!isConnected && peer && !peer.destroyed) {
-          connectToHostPeer();
+        if (!isConnected) {
+          if (!peer || peer.destroyed || peer.disconnected) {
+            initWebRTC();
+          } else {
+            connectToHostPeer();
+          }
         }
-      }, 1800);
+      }, 2000);
     }
 
     function initSupabase() {
+      // Guarded: only initialize if a valid custom Supabase project is supplied
       try {
         if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-          supabaseChannel = supabaseClient.channel('aero_' + roomCode);
+          if (SUPABASE_URL && !SUPABASE_URL.includes('gbyuturnmvfojtpgurun')) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            supabaseChannel = supabaseClient.channel('aero_' + roomCode);
 
-          supabaseChannel
-            .on('broadcast', { event: 'telemetry' }, (payload) => {
-              if (payload.payload) handleIncomingData(payload.payload);
-            })
-            .subscribe((status) => {
-              if (status === 'SUBSCRIBED' && !isConnected) setConnected(true, 'RELAY');
-            });
+            supabaseChannel
+              .on('broadcast', { event: 'telemetry' }, (payload) => {
+                if (payload.payload) handleIncomingData(payload.payload);
+              })
+              .subscribe((status) => {
+                if (status === 'SUBSCRIBED' && !isConnected) setConnected(true, 'RELAY');
+              });
+          }
         }
       } catch(e) {}
     }
@@ -1079,7 +1204,7 @@
         text.textContent = label || 'LINKED';
       } else {
         dot.classList.remove('connected');
-        text.textContent = 'DISCONNECTED';
+        text.textContent = label || 'DISCONNECTED';
       }
     }
 
