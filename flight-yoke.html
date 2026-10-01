@@ -18,7 +18,6 @@
       --amber-alert: #f59e0b;
       --emerald-ready: #10b981;
       --rose-danger: #f43f5e;
-      --hud-border: rgba(0, 240, 255, 0.35);
       --font-mono: 'Share Tech Mono', monospace;
       --font-display: 'Orbitron', -apple-system, sans-serif;
     }
@@ -54,7 +53,6 @@
       justify-content: center;
       padding: 24px;
       text-align: center;
-      transition: opacity 0.3s ease;
     }
 
     @media (orientation: landscape) {
@@ -64,9 +62,9 @@
     }
 
     .rotate-phone-icon {
-      width: 72px;
-      height: 72px;
-      margin-bottom: 20px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
       animation: rotateHint 2.4s ease-in-out infinite;
     }
 
@@ -78,17 +76,16 @@
 
     .rotate-title {
       font-family: var(--font-display);
-      font-size: 16px;
+      font-size: 15px;
       letter-spacing: 2px;
       color: var(--cyan-glow);
-      margin-bottom: 10px;
-      text-shadow: 0 0 12px var(--cyan-dim);
+      margin-bottom: 8px;
     }
 
     .rotate-desc {
-      font-size: 13px;
+      font-size: 12px;
       color: #94a3b8;
-      max-width: 340px;
+      max-width: 320px;
       line-height: 1.5;
     }
 
@@ -110,72 +107,47 @@
       border: 1px solid var(--cyan-glow);
       box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
       border-radius: 14px;
-      padding: 24px;
+      padding: 22px;
       width: 100%;
-      max-width: 360px;
+      max-width: 340px;
       text-align: center;
     }
 
     .modal-title {
       font-family: var(--font-display);
-      font-size: 15px;
+      font-size: 14px;
       color: var(--cyan-glow);
-      letter-spacing: 2px;
-      margin-bottom: 12px;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
     }
 
     .modal-input {
       width: 100%;
       padding: 12px;
       font-family: var(--font-mono);
-      font-size: 20px;
-      letter-spacing: 4px;
+      font-size: 18px;
+      letter-spacing: 3px;
       text-align: center;
       background: #070a13;
       border: 1px solid #334155;
       border-radius: 8px;
       color: #fff;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       outline: none;
-    }
-
-    .modal-input:focus {
-      border-color: var(--cyan-glow);
-      box-shadow: 0 0 12px var(--cyan-dim);
     }
 
     .modal-btn {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       font-family: var(--font-display);
-      font-size: 12px;
-      letter-spacing: 2px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      background: #0284c7;
       border: 1px solid #38bdf8;
       border-radius: 8px;
       color: #fff;
       font-weight: 700;
-      cursor: pointer;
-    }
-
-    /* Motion Permission Prompt */
-    #permission-banner {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(245, 158, 11, 0.95);
-      color: #000;
-      font-weight: 700;
-      font-size: 12px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      z-index: 8000;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       cursor: pointer;
     }
 
@@ -184,12 +156,12 @@
       width: 100vw;
       height: 100vh;
       display: grid;
-      grid-template-rows: 42px 1fr 40px;
+      grid-template-rows: 42px 1fr 34px;
       background: radial-gradient(circle at 50% 50%, #0d1527 0%, #050811 100%);
       position: relative;
     }
 
-    /* Top HUD Avionics Header */
+    /* Top HUD Header */
     .avionics-header {
       display: flex;
       align-items: center;
@@ -203,30 +175,15 @@
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-
-    .brand-icon {
-      font-size: 16px;
-      filter: drop-shadow(0 0 6px var(--cyan-glow));
+      gap: 8px;
     }
 
     .brand-title {
       font-family: var(--font-display);
       font-size: 12px;
       font-weight: 900;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: #fff;
-    }
-
-    .brand-sub {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--cyan-glow);
-      background: rgba(0, 240, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(0, 240, 255, 0.25);
     }
 
     .status-group {
@@ -253,7 +210,6 @@
       border-radius: 50%;
       background: #f59e0b;
       box-shadow: 0 0 8px #f59e0b;
-      transition: background 0.3s ease;
     }
 
     .status-dot.connected {
@@ -272,44 +228,43 @@
       cursor: pointer;
     }
 
-    .hdr-btn.active {
-      color: var(--cyan-glow);
-      border-color: var(--cyan-glow);
-      background: rgba(0, 240, 255, 0.15);
+    .hdr-btn.pause-btn {
+      border-color: #fbbf24;
+      color: #fef08a;
+      background: rgba(245, 158, 11, 0.2);
+      font-weight: 700;
     }
 
-    /* Primary Cockpit Deck: 3-Column Split */
+    /* Cockpit Deck: Left (Throttle) | Center (Horizon) | Right (Avionics) */
     .cockpit-deck {
       display: grid;
-      grid-template-columns: 190px 1fr 190px;
-      padding: 10px 14px;
-      gap: 12px;
+      grid-template-columns: 180px 1fr 180px;
+      padding: 8px 12px;
+      gap: 10px;
       height: 100%;
       min-height: 0;
     }
 
-    /* Left Avionics Wing: Throttle & Boost */
+    /* Left Wing: Throttle & Boost */
     .avionics-wing-left {
       background: rgba(11, 18, 33, 0.7);
       border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 12px;
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      position: relative;
+      gap: 6px;
     }
 
     .wing-label {
       font-family: var(--font-display);
-      font-size: 10px;
-      letter-spacing: 1.5px;
+      font-size: 9px;
+      letter-spacing: 1px;
       color: #94a3b8;
       display: flex;
       justify-content: space-between;
-      align-items: center;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 4px;
+      padding-bottom: 3px;
     }
 
     .throttle-container {
@@ -318,7 +273,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
       background: rgba(0, 0, 0, 0.4);
       border-radius: 8px;
       border: 1px solid #1e293b;
@@ -326,14 +280,13 @@
     }
 
     .throttle-track {
-      width: 44px;
-      height: 82%;
+      width: 40px;
+      height: 80%;
       background: #0f172a;
       border: 1px solid #334155;
-      border-radius: 22px;
+      border-radius: 20px;
       position: relative;
       overflow: hidden;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
     }
 
     .throttle-fill {
@@ -343,8 +296,6 @@
       right: 0;
       height: 70%;
       background: linear-gradient(to top, #0284c7, var(--cyan-glow));
-      box-shadow: 0 0 16px var(--cyan-dim);
-      transition: height 0.05s linear;
     }
 
     .throttle-handle {
@@ -352,60 +303,33 @@
       left: 50%;
       transform: translate(-50%, 50%);
       bottom: 70%;
-      width: 58px;
-      height: 28px;
+      width: 52px;
+      height: 24px;
       background: #1e293b;
       border: 2px solid var(--cyan-glow);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+      border-radius: 12px;
       pointer-events: none;
-    }
-
-    .throttle-handle::after {
-      content: '';
-      width: 24px;
-      height: 3px;
-      background: var(--cyan-glow);
-      border-radius: 2px;
-    }
-
-    .throttle-readout {
-      margin-top: 6px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--cyan-glow);
-      font-weight: 700;
     }
 
     .action-tactile-btn {
       width: 100%;
-      padding: 12px 8px;
+      padding: 10px 6px;
       font-family: var(--font-display);
-      font-size: 11px;
-      letter-spacing: 1.5px;
+      font-size: 10px;
+      letter-spacing: 1px;
       font-weight: 900;
       border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: transform 0.08s ease, filter 0.08s ease;
       touch-action: none;
-    }
-
-    .action-tactile-btn:active, .action-tactile-btn.pressed {
-      transform: scale(0.96);
     }
 
     .btn-boost {
       background: linear-gradient(135deg, #f59e0b, #d97706);
       border: 1px solid #fbbf24;
       color: #000;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
     }
 
     .btn-brake {
@@ -419,7 +343,7 @@
       color: #fff;
     }
 
-    /* Center Instrument Cluster: Primary Attitude Indicator */
+    /* Center: Attitude Indicator */
     .cockpit-center {
       display: flex;
       flex-direction: column;
@@ -431,14 +355,13 @@
     .hud-attitude-bezel {
       width: 100%;
       height: 100%;
-      max-width: 380px;
-      max-height: 250px;
+      max-width: 360px;
+      max-height: 240px;
       background: #090e1a;
-      border: 2px solid rgba(0, 240, 255, 0.4);
-      border-radius: 16px;
+      border: 2px solid rgba(0, 240, 255, 0.35);
+      border-radius: 14px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -450,7 +373,6 @@
       display: block;
     }
 
-    /* Attitude Static Aircraft Reticle */
     .reticle-overlay {
       position: absolute;
       inset: 0;
@@ -461,84 +383,43 @@
     }
 
     .reticle-crosshair {
-      width: 100px;
-      height: 40px;
+      width: 80px;
+      height: 30px;
       position: relative;
     }
 
-    .reticle-crosshair::before {
+    .reticle-crosshair::before, .reticle-crosshair::after {
       content: '';
       position: absolute;
-      left: 0;
       top: 50%;
-      width: 32px;
-      height: 4px;
+      width: 24px;
+      height: 3px;
       background: #fbbf24;
       border-radius: 2px;
-      box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
     }
-
-    .reticle-crosshair::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      width: 32px;
-      height: 4px;
-      background: #fbbf24;
-      border-radius: 2px;
-      box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
-    }
+    .reticle-crosshair::before { left: 0; }
+    .reticle-crosshair::after { right: 0; }
 
     .reticle-center-pip {
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       background: #fbbf24;
       border-radius: 50%;
-      box-shadow: 0 0 10px #fbbf24;
     }
 
-    /* Pitch & Roll Numerical Stream */
-    .attitude-metrics-bar {
-      position: absolute;
-      top: 6px;
-      width: 90%;
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--cyan-glow);
-      text-shadow: 0 0 6px var(--cyan-dim);
-      pointer-events: none;
-    }
-
-    .calibration-alert-badge {
-      position: absolute;
-      bottom: 8px;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: #94a3b8;
-      pointer-events: none;
-    }
-
-    /* Right Avionics Wing: Flight Instruments & Controls */
+    /* Right Wing: Telemetry & Aux */
     .avionics-wing-right {
       background: rgba(11, 18, 33, 0.7);
       border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 12px;
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      position: relative;
+      gap: 6px;
     }
 
     .telemetry-grid {
@@ -551,8 +432,8 @@
     .dial-card {
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid #1e293b;
-      border-radius: 8px;
-      padding: 6px 8px;
+      border-radius: 6px;
+      padding: 6px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -560,37 +441,28 @@
 
     .dial-title {
       font-family: var(--font-mono);
-      font-size: 9px;
+      font-size: 8px;
       color: #64748b;
       text-transform: uppercase;
-      margin-bottom: 2px;
     }
 
     .dial-val {
       font-family: var(--font-mono);
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       color: #fff;
     }
 
-    .dial-val.cyan { color: var(--cyan-glow); text-shadow: 0 0 8px var(--cyan-dim); }
+    .dial-val.cyan { color: var(--cyan-glow); }
     .dial-val.amber { color: var(--amber-alert); }
-    .dial-val.emerald { color: var(--emerald-ready); }
 
     .btn-calibrate {
       background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(2, 132, 199, 0.3));
       border: 1px solid var(--cyan-glow);
       color: var(--cyan-glow);
-      box-shadow: 0 0 12px var(--cyan-dim);
     }
 
-    .btn-aux {
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid #475569;
-      color: #cbd5e1;
-    }
-
-    /* Bottom Status Strip */
+    /* Bottom Footer */
     .cockpit-footer {
       display: flex;
       align-items: center;
@@ -599,66 +471,51 @@
       background: rgba(8, 12, 22, 0.9);
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       font-family: var(--font-mono);
-      font-size: 10px;
+      font-size: 9px;
       color: #64748b;
-    }
-
-    .footer-hints {
-      color: #94a3b8;
-    }
-
-    .footer-hints span {
-      color: var(--cyan-glow);
     }
   </style>
 </head>
 <body>
 
-  <!-- Landscape Enforcement Screen -->
+  <!-- Landscape Enforcement -->
   <div id="rotate-overlay">
     <svg class="rotate-phone-icon" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
       <line x1="12" y1="18" x2="12.01" y2="18"></line>
     </svg>
     <div class="rotate-title">HOLD HORIZONTALLY</div>
-    <div class="rotate-desc">Turn your phone sideways into landscape mode. Hold it with both hands like a flight yoke to steer the aircraft!</div>
+    <div class="rotate-desc">Turn sideways into landscape mode. Hold like a flight yoke to steer!</div>
   </div>
 
   <!-- Room Code Prompt Modal (if URL missing room) -->
   <div id="room-modal">
     <div class="modal-card">
       <div class="modal-title">CONNECT TO SIMULATOR</div>
-      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">Enter the 4-character Room Code displayed on your Chromebook screen:</p>
+      <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Enter the Room Code shown on your Chromebook:</p>
       <input type="text" id="room-input" class="modal-input" maxlength="8" placeholder="AERO-XXXX">
       <button class="modal-btn" onclick="submitRoomCode()">LINK FLIGHT YOKE</button>
     </div>
   </div>
 
-  <!-- Motion Permission Banner for iOS / Chrome Sensor Grants -->
-  <div id="permission-banner" onclick="requestMotionPermission()">
-    <span>⚠️ TAP HERE TO ENABLE MOTION GYROSCOPE</span>
-  </div>
-
-  <!-- Primary Cockpit Frame -->
+  <!-- Main Cockpit Frame -->
   <div id="cockpit-container">
     
     <!-- Top Header -->
     <header class="avionics-header">
       <div class="brand-group">
-        <span class="brand-icon">✈️</span>
+        <span style="font-size:14px;">✈️</span>
         <span class="brand-title">POCKETPAD AERO</span>
-        <span class="brand-sub">GYRO YOKE</span>
       </div>
 
       <div class="status-group">
+        <button id="btn-pause-header" class="hdr-btn pause-btn" onclick="togglePauseRemote()">
+          <span>⏸ PAUSE</span>
+        </button>
         <div class="status-chip">
           <div id="status-dot" class="status-dot"></div>
-          <span id="status-text">INITIALIZING</span>
+          <span id="status-text">PAIRING...</span>
         </div>
-        <div class="status-chip">
-          <span id="ping-text">PING: --ms</span>
-        </div>
-        <button id="haptic-toggle" class="hdr-btn active" onclick="toggleHaptics()">VIB: ON</button>
         <button class="hdr-btn" onclick="toggleFullscreen()">⛶ FULL</button>
       </div>
     </header>
@@ -666,10 +523,10 @@
     <!-- Center Flight Deck -->
     <main class="cockpit-deck">
       
-      <!-- Left Wing: Throttle & Boost -->
+      <!-- Left: Throttle -->
       <section class="avionics-wing-left">
         <div class="wing-label">
-          <span>THROTTLE / THRUST</span>
+          <span>THROTTLE</span>
           <span id="throttle-pct" style="color:var(--cyan-glow);">70%</span>
         </div>
 
@@ -678,21 +535,20 @@
             <div id="throttle-fill" class="throttle-fill"></div>
             <div id="throttle-handle" class="throttle-handle"></div>
           </div>
-          <div class="throttle-readout" id="thrust-label">CRUISE</div>
         </div>
 
         <button id="btn-boost" class="action-tactile-btn btn-boost">
-          <span>⚡ AFTERBURNER</span>
+          <span>⚡ BOOST</span>
         </button>
         <button id="btn-brake" class="action-tactile-btn btn-brake">
-          <span>🛑 AIRBRAKE</span>
+          <span>🛑 BRAKE</span>
         </button>
       </section>
 
-      <!-- Center: Attitude Indicator & Artificial Horizon -->
+      <!-- Center: Attitude Canvas -->
       <section class="cockpit-center">
         <div class="hud-attitude-bezel">
-          <canvas id="attitude-canvas" width="380" height="250"></canvas>
+          <canvas id="attitude-canvas" width="360" height="240"></canvas>
           
           <div class="reticle-overlay">
             <div class="reticle-crosshair">
@@ -700,52 +556,44 @@
             </div>
           </div>
 
-          <div class="attitude-metrics-bar">
-            <span>ROLL: <strong id="roll-deg">0.0°</strong></span>
+          <div style="position:absolute;top:6px;width:90%;display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--cyan-glow);pointer-events:none;">
+            <span>BANK: <strong id="roll-deg">0.0°</strong></span>
             <span>PITCH: <strong id="pitch-deg">0.0°</strong></span>
           </div>
 
-          <div class="calibration-alert-badge" id="calib-indicator">
-            NEUTRAL TRIM: ACTIVE
+          <div id="calib-indicator" style="position:absolute;bottom:6px;background:rgba(15,23,42,0.85);border:1px solid rgba(0,240,255,0.3);padding:2px 8px;border-radius:10px;font-family:var(--font-mono);font-size:9px;color:#94a3b8;pointer-events:none;">
+            AUTO-LEVEL TRIM ACTIVE
           </div>
         </div>
       </section>
 
-      <!-- Right Wing: Telemetry & Aux Commands -->
+      <!-- Right: Telemetry & Aux -->
       <section class="avionics-wing-right">
         <div class="wing-label">
-          <span>AVIONICS HUD</span>
-          <span id="room-badge" style="color:#94a3b8;">ROOM: ----</span>
+          <span>TELEMETRY</span>
+          <span id="room-badge" style="color:var(--cyan-glow);">----</span>
         </div>
 
         <div class="telemetry-grid">
           <div class="dial-card">
-            <span class="dial-title">AIRSPEED</span>
-            <span class="dial-val cyan" id="hud-speed">240 <small style="font-size:10px;color:#94a3b8;">KT</small></span>
+            <span class="dial-title">SPEED</span>
+            <span class="dial-val cyan" id="hud-speed">240 <small style="font-size:9px;">KT</small></span>
           </div>
           <div class="dial-card">
-            <span class="dial-title">ALTITUDE</span>
-            <span class="dial-val amber" id="hud-alt">3,500 <small style="font-size:10px;color:#94a3b8;">FT</small></span>
-          </div>
-          <div class="dial-card">
-            <span class="dial-title">RINGS</span>
-            <span class="dial-val emerald" id="hud-rings">0 / 12</span>
-          </div>
-          <div class="dial-card">
-            <span class="dial-title">G-FORCE</span>
-            <span class="dial-val" id="hud-gforce">1.0 G</span>
+            <span class="dial-title">ALT</span>
+            <span class="dial-val amber" id="hud-alt">3,500 <small style="font-size:9px;">FT</small></span>
           </div>
         </div>
 
         <button id="btn-calibrate" class="action-tactile-btn btn-calibrate" onclick="calibrateNeutral()">
-          <span>🎯 CALIBRATE NEUTRAL</span>
+          <span>🎯 CALIBRATE ZERO</span>
         </button>
         
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button id="btn-camera" class="action-tactile-btn btn-aux" onclick="sendAction('camera_toggle')">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;" onclick="sendAction('camera_toggle')">
             <span>📷 CAM</span>
           </button>
-          <button id="btn-level" class="action-tactile-btn btn-aux" onclick="sendAction('level_wings')">
+          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;" onclick="sendAction('level_wings')">
             <span>⚖️ LEVEL</span>
           </button>
         </div>
@@ -753,61 +601,60 @@
 
     </main>
 
-    <!-- Bottom Telemetry Footer -->
+    <!-- Footer -->
     <footer class="cockpit-footer">
-      <div class="footer-hints">
-        Tilt <span>Left/Right</span> to Bank • Push <span>Forward</span> to Dive • Pull <span>Back</span> to Climb
-      </div>
-      <div id="sensor-mode-text">
-        SENSOR: GYROSCOPE (ACTIVE)
-      </div>
+      <div>Tilt to bank & pitch • Auto-levels on center</div>
+      <div id="sensor-mode-text">GYROSCOPE (STABILIZED)</div>
     </footer>
 
   </div>
 
   <script>
-    // State & Architecture
+    // System & Connection State
     let roomCode = '';
     let peer = null;
     let conn = null;
     let supabaseClient = null;
     let supabaseChannel = null;
     let isConnected = false;
-    let hapticsEnabled = true;
-    let lastPingTime = 0;
+    let isPausedRemote = false;
+    let reconnectTimer = null;
 
     // Neutral Trim Calibration
-    let neutralBeta = 0;   // Forward/Back baseline
-    let neutralGamma = 0;  // Left/Right baseline
+    let neutralBeta = 0;
+    let neutralGamma = 0;
     let isCalibrated = false;
 
-    // Current Normalized Control Inputs (-1.0 to 1.0)
-    let currentPitch = 0.0;     // -1 (full dive) to +1 (full climb)
-    let currentRoll = 0.0;      // -1 (full bank left) to +1 (full bank right)
-    let currentThrottle = 0.70; // 0.0 to 1.0
+    // Normalized Inputs (-1.0 to 1.0)
+    let currentPitch = 0.0;
+    let currentRoll = 0.0;
+    let currentThrottle = 0.70;
     let isBoosting = false;
     let isBraking = false;
 
-    // Raw Sensor Inputs
     let rawBeta = 0;
     let rawGamma = 0;
-    let rawAlpha = 0;
 
-    // Supabase Relaying Fallback
     const SUPABASE_URL = 'https://gbyuturnmvfojtpgurun.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_unRzEUh5rkdVI2DdIFqh5g_6K-JMEGi';
 
-    // Canvas Attitude Indicator
     const canvas = document.getElementById('attitude-canvas');
     const ctx = canvas.getContext('2d');
 
-    // Parse URL room code
+    // Parse Room & Persistence
     function parseRoom() {
       const params = new URLSearchParams(window.location.search);
-      const r = params.get('room');
+      let r = params.get('room');
+
+      if (!r || r.trim().length === 0) {
+        // Check localStorage persistence
+        r = localStorage.getItem('pocketpad_aero_room');
+      }
+
       if (r && r.trim().length > 0) {
         roomCode = r.trim().toUpperCase();
-        document.getElementById('room-badge').textContent = 'ROOM: ' + roomCode;
+        localStorage.setItem('pocketpad_aero_room', roomCode);
+        document.getElementById('room-badge').textContent = roomCode;
         initConduits();
       } else {
         document.getElementById('room-modal').style.display = 'flex';
@@ -818,32 +665,14 @@
       const input = document.getElementById('room-input');
       if (input.value.trim().length > 0) {
         roomCode = input.value.trim().toUpperCase();
+        localStorage.setItem('pocketpad_aero_room', roomCode);
         document.getElementById('room-modal').style.display = 'none';
-        document.getElementById('room-badge').textContent = 'ROOM: ' + roomCode;
+        document.getElementById('room-badge').textContent = roomCode;
         initConduits();
       }
     }
 
-    // Haptics Engine
-    function triggerHaptic(duration = 20) {
-      if (!hapticsEnabled) return;
-      if ('vibrate' in navigator) {
-        try {
-          navigator.vibrate(duration);
-        } catch (e) {}
-      }
-    }
-
-    function toggleHaptics() {
-      hapticsEnabled = !hapticsEnabled;
-      const btn = document.getElementById('haptic-toggle');
-      btn.textContent = hapticsEnabled ? 'VIB: ON' : 'VIB: OFF';
-      btn.classList.toggle('active', hapticsEnabled);
-      if (hapticsEnabled) triggerHaptic(25);
-    }
-
     function toggleFullscreen() {
-      triggerHaptic(20);
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
       } else {
@@ -851,84 +680,51 @@
       }
     }
 
-    // Screen Wake Lock
-    async function requestWakeLock() {
-      if ('wakeLock' in navigator) {
-        try {
-          await navigator.wakeLock.request('screen');
-        } catch (e) {}
-      }
-    }
-
-    // Orientation & Motion Sensors
+    // Gyroscope & Motion Sensors (Stabilized Curve)
     function initSensors() {
       if (typeof DeviceOrientationEvent !== 'undefined') {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-          // iOS 13+ requires user permission grant
-          document.getElementById('permission-banner').style.display = 'flex';
+          DeviceOrientationEvent.requestPermission().then(state => {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+          }).catch(() => {});
         } else {
-          // Android / Chrome standard
           window.addEventListener('deviceorientation', handleOrientation, true);
         }
-      } else {
-        document.getElementById('sensor-mode-text').textContent = 'SENSOR: TOUCH FALLBACK';
-      }
-    }
-
-    function requestMotionPermission() {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission().then(state => {
-          if (state === 'granted') {
-            document.getElementById('permission-banner').style.display = 'none';
-            window.addEventListener('deviceorientation', handleOrientation, true);
-            triggerHaptic(30);
-          }
-        }).catch(err => {
-          console.warn('Sensor permission error:', err);
-        });
       }
     }
 
     function handleOrientation(e) {
       if (e.beta === null || e.gamma === null) return;
 
-      rawBeta = e.beta;   // -180 to 180
-      rawGamma = e.gamma; // -90 to 90
-      rawAlpha = e.alpha || 0;
+      rawBeta = e.beta;
+      rawGamma = e.gamma;
 
-      // First time reading: auto-calibrate neutral baseline
       if (!isCalibrated) {
         calibrateNeutral();
       }
 
-      // Compute Delta from Neutral
-      // In landscape (holding phone with long edge horizontal):
-      // Tilting left/right (banking steering wheel) corresponds to beta rotation in landscape
-      // Tilting forward/back (pitching yoke) corresponds to gamma rotation in landscape
-      
+      // Delta from calibrated neutral posture
       const screenAngle = (window.orientation !== undefined) ? window.orientation : (screen.orientation ? screen.orientation.angle : 90);
       
       let deltaPitch = 0;
       let deltaRoll = 0;
 
       if (screenAngle === 90) {
-        // Standard Landscape (Phone rotated 90deg counter-clockwise)
-        deltaPitch = (rawGamma - neutralGamma); 
+        deltaPitch = (rawGamma - neutralGamma);
         deltaRoll = -(rawBeta - neutralBeta);
       } else if (screenAngle === -90 || screenAngle === 270) {
-        // Reverse Landscape
         deltaPitch = -(rawGamma - neutralGamma);
         deltaRoll = (rawBeta - neutralBeta);
       } else {
-        // Fallback
         deltaPitch = (rawBeta - neutralBeta);
         deltaRoll = (rawGamma - neutralGamma);
       }
 
-      // Map to -1.0 to 1.0 with smooth deadzone and non-linear curve
-      // Full deflection is roughly 35 degrees of hand tilt
-      const MAX_TILT = 35.0;
-      const DEADZONE = 1.5;
+      // Wide 2.5° deadzone to eliminate hand tremors completely
+      const DEADZONE = 2.5;
+      const MAX_TILT = 32.0;
 
       let p = deltaPitch;
       let r = deltaRoll;
@@ -939,30 +735,26 @@
       if (Math.abs(r) < DEADZONE) r = 0;
       else r = (r > 0 ? r - DEADZONE : r + DEADZONE) / (MAX_TILT - DEADZONE);
 
-      // Clamp between -1.0 and +1.0
-      currentPitch = Math.max(-1.0, Math.min(1.0, p));
-      currentRoll = Math.max(-1.0, Math.min(1.0, r));
+      // Smooth cubic curve for intuitive self-centering
+      currentPitch = Math.max(-1.0, Math.min(1.0, Math.sign(p) * Math.pow(Math.abs(p), 1.2)));
+      currentRoll = Math.max(-1.0, Math.min(1.0, Math.sign(r) * Math.pow(Math.abs(r), 1.2)));
 
-      // Update phone UI degrees
       document.getElementById('roll-deg').textContent = (currentRoll * 35).toFixed(1) + '°';
-      document.getElementById('pitch-deg').textContent = (currentPitch * 35).toFixed(1) + '°';
+      document.getElementById('pitch-deg').textContent = (currentPitch * 25).toFixed(1) + '°';
     }
 
     function calibrateNeutral() {
       neutralBeta = rawBeta;
       neutralGamma = rawGamma;
       isCalibrated = true;
-      triggerHaptic([30, 20, 30]);
+      if ('vibrate' in navigator) navigator.vibrate([25, 20, 25]);
 
       const badge = document.getElementById('calib-indicator');
-      badge.textContent = 'TRIM CALIBRATED (0,0)';
+      badge.textContent = 'TRIM CENTERED (0,0)';
       badge.style.color = '#00f0ff';
-      badge.style.borderColor = '#00f0ff';
-
       setTimeout(() => {
-        badge.textContent = 'NEUTRAL TRIM: ACTIVE';
+        badge.textContent = 'AUTO-LEVEL TRIM ACTIVE';
         badge.style.color = '#94a3b8';
-        badge.style.borderColor = 'rgba(0, 240, 255, 0.4)';
       }, 1500);
     }
 
@@ -972,7 +764,6 @@
       const fill = document.getElementById('throttle-fill');
       const handle = document.getElementById('throttle-handle');
       const pctLabel = document.getElementById('throttle-pct');
-      const thrustLabel = document.getElementById('thrust-label');
 
       let isDragging = false;
 
@@ -980,22 +771,22 @@
         const rect = zone.getBoundingClientRect();
         let y = clientY - rect.top;
         y = Math.max(0, Math.min(rect.height, y));
-        // invert: top is 100%, bottom is 0%
         let pct = 1.0 - (y / rect.height);
-        setThrottle(pct);
+        currentThrottle = Math.max(0.0, Math.min(1.0, pct));
+        const pct100 = Math.round(currentThrottle * 100);
+        fill.style.height = pct100 + '%';
+        handle.style.bottom = pct100 + '%';
+        pctLabel.textContent = pct100 + '%';
       }
 
       zone.addEventListener('pointerdown', (e) => {
         isDragging = true;
         zone.setPointerCapture(e.pointerId);
         updateFromTouch(e.clientY);
-        triggerHaptic(15);
       });
 
       zone.addEventListener('pointermove', (e) => {
-        if (isDragging) {
-          updateFromTouch(e.clientY);
-        }
+        if (isDragging) updateFromTouch(e.clientY);
       });
 
       zone.addEventListener('pointerup', (e) => {
@@ -1003,90 +794,58 @@
         try { zone.releasePointerCapture(e.pointerId); } catch(err){}
       });
 
-      zone.addEventListener('pointercancel', () => {
-        isDragging = false;
-      });
-
-      function setThrottle(val) {
-        currentThrottle = Math.max(0.0, Math.min(1.0, val));
-        const pct100 = Math.round(currentThrottle * 100);
-        fill.style.height = pct100 + '%';
-        handle.style.bottom = pct100 + '%';
-        pctLabel.textContent = pct100 + '%';
-
-        if (pct100 > 85) thrustLabel.textContent = 'MAX THRUST';
-        else if (pct100 > 50) thrustLabel.textContent = 'CRUISE';
-        else if (pct100 > 15) thrustLabel.textContent = 'LOW IDLE';
-        else thrustLabel.textContent = 'GLIDE / ZERO';
-      }
-
-      setThrottle(0.70);
+      zone.addEventListener('pointercancel', () => { isDragging = false; });
     }
 
-    // Afterburner & Airbrake Tactile Buttons
+    // Tactile Buttons
     function initTactileButtons() {
       const boostBtn = document.getElementById('btn-boost');
       const brakeBtn = document.getElementById('btn-brake');
 
-      // Boost
-      boostBtn.addEventListener('pointerdown', (e) => {
+      boostBtn.addEventListener('pointerdown', () => {
         isBoosting = true;
-        boostBtn.classList.add('pressed');
-        triggerHaptic(40);
         sendYokePacket();
       });
+      const endBoost = () => { isBoosting = false; sendYokePacket(); };
+      boostBtn.addEventListener('pointerup', endBoost);
+      boostBtn.addEventListener('pointercancel', endBoost);
 
-      const releaseBoost = () => {
-        if (isBoosting) {
-          isBoosting = false;
-          boostBtn.classList.remove('pressed');
-          sendYokePacket();
-        }
-      };
-      boostBtn.addEventListener('pointerup', releaseBoost);
-      boostBtn.addEventListener('pointercancel', releaseBoost);
-
-      // Brake
-      brakeBtn.addEventListener('pointerdown', (e) => {
+      brakeBtn.addEventListener('pointerdown', () => {
         isBraking = true;
         brakeBtn.classList.add('pressed');
-        triggerHaptic(25);
         sendYokePacket();
       });
+      const endBrake = () => { isBraking = false; brakeBtn.classList.remove('pressed'); sendYokePacket(); };
+      brakeBtn.addEventListener('pointerup', endBrake);
+      brakeBtn.addEventListener('pointercancel', endBrake);
+    }
 
-      const releaseBrake = () => {
-        if (isBraking) {
-          isBraking = false;
-          brakeBtn.classList.remove('pressed');
-          sendYokePacket();
-        }
-      };
-      brakeBtn.addEventListener('pointerup', releaseBrake);
-      brakeBtn.addEventListener('pointercancel', releaseBrake);
+    function togglePauseRemote() {
+      sendAction('toggle_pause');
+      isPausedRemote = !isPausedRemote;
+      updatePauseUI();
+    }
+
+    function updatePauseUI() {
+      const btn = document.getElementById('btn-pause-header');
+      btn.innerHTML = isPausedRemote ? '<span>▶ RESUME</span>' : '<span>⏸ PAUSE</span>';
     }
 
     function sendAction(actionName) {
-      triggerHaptic(20);
-      const packet = {
-        type: 'action',
-        action: actionName,
-        timestamp: Date.now()
-      };
-      sendData(packet);
+      if ('vibrate' in navigator) navigator.vibrate(20);
+      sendData({ type: 'action', action: actionName, timestamp: Date.now() });
     }
 
-    // High-Rate Control Loop (Sends Yoke telemetry at 40Hz)
+    // 40Hz Control Loop
     function startControlLoop() {
       setInterval(() => {
-        if (isConnected) {
-          sendYokePacket();
-        }
+        if (isConnected) sendYokePacket();
         drawAttitudeIndicator();
-      }, 25); // 40Hz
+      }, 25);
     }
 
     function sendYokePacket() {
-      const packet = {
+      sendData({
         type: 'yoke_input',
         pitch: currentPitch,
         roll: currentRoll,
@@ -1094,27 +853,18 @@
         boost: isBoosting,
         brake: isBraking,
         timestamp: Date.now()
-      };
-      sendData(packet);
+      });
     }
 
     function sendData(data) {
       if (conn && conn.open) {
-        try {
-          conn.send(data);
-        } catch(e) {}
+        try { conn.send(data); } catch(e) {}
       } else if (supabaseChannel) {
-        try {
-          supabaseChannel.send({
-            type: 'broadcast',
-            event: 'yoke_input',
-            payload: data
-          });
-        } catch(e) {}
+        try { supabaseChannel.send({ type: 'broadcast', event: 'yoke_input', payload: data }); } catch(e) {}
       }
     }
 
-    // Draw 2D Attitude Indicator / Artificial Horizon Canvas
+    // 2D Attitude Indicator
     function drawAttitudeIndicator() {
       const w = canvas.width;
       const h = canvas.height;
@@ -1122,90 +872,56 @@
       const cy = h / 2;
 
       ctx.clearRect(0, 0, w, h);
-
       ctx.save();
       ctx.translate(cx, cy);
 
-      // Roll angle in radians (visual roll rotates the horizon opposite to aircraft roll)
       const rollRad = -currentRoll * (35 * Math.PI / 180);
       ctx.rotate(rollRad);
 
-      // Pitch offset in pixels
-      const pitchPixels = currentPitch * 75; // 75px max displacement
+      const pitchPixels = currentPitch * 65;
       ctx.translate(0, pitchPixels);
 
-      // Sky (Top half)
+      // Sky
       ctx.fillStyle = '#0284c7';
       ctx.fillRect(-w, -h * 2, w * 2, h * 2);
 
-      // Ground (Bottom half)
+      // Ground
       ctx.fillStyle = '#78350f';
       ctx.fillRect(-w, 0, w * 2, h * 2);
 
-      // Horizon Line
+      // Horizon line
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(-w, 0);
       ctx.lineTo(w, 0);
       ctx.stroke();
 
-      // Pitch Ladder Lines (+10, +20, -10, -20)
-      ctx.lineWidth = 2;
-      ctx.font = '10px "Share Tech Mono", monospace';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-
-      const ladderSteps = [-20, -10, 10, 20];
-      ladderSteps.forEach(deg => {
-        const yOffset = -deg * 2.2;
-        ctx.strokeStyle = (deg > 0) ? '#38bdf8' : '#fbbf24';
-
-        ctx.beginPath();
-        ctx.moveTo(-25, yOffset);
-        ctx.lineTo(25, yOffset);
-        ctx.stroke();
-
-        ctx.fillText(deg + '°', 35, yOffset + 3);
-        ctx.fillText(deg + '°', -35, yOffset + 3);
-      });
-
       ctx.restore();
     }
 
-    // Telemetry Receiver from Flight Simulator
+    // Incoming Telemetry
     function handleIncomingData(data) {
       if (!data) return;
 
-      if (data.type === 'pong') {
-        const ping = Date.now() - lastPingTime;
-        document.getElementById('ping-text').textContent = 'PING: ' + ping + 'ms';
-        return;
-      }
-
       if (data.type === 'telemetry') {
-        if (data.speed !== undefined) document.getElementById('hud-speed').innerHTML = `${Math.round(data.speed)} <small style="font-size:10px;color:#94a3b8;">KT</small>`;
-        if (data.alt !== undefined) document.getElementById('hud-alt').innerHTML = `${Math.round(data.alt).toLocaleString()} <small style="font-size:10px;color:#94a3b8;">FT</small>`;
-        if (data.rings !== undefined) document.getElementById('hud-rings').textContent = `${data.rings} / ${data.totalRings || 12}`;
-        if (data.gForce !== undefined) document.getElementById('hud-gforce').textContent = `${data.gForce.toFixed(1)} G`;
-
-        // Ring collection celebration haptic
-        if (data.event === 'ring_hit') {
-          triggerHaptic([35, 30, 45]);
-        } else if (data.event === 'high_g') {
-          triggerHaptic(20);
-        } else if (data.event === 'stall') {
-          triggerHaptic([60, 40, 60]);
+        if (data.speed !== undefined) document.getElementById('hud-speed').innerHTML = `${Math.round(data.speed)} <small style="font-size:9px;">KT</small>`;
+        if (data.alt !== undefined) document.getElementById('hud-alt').innerHTML = `${Math.round(data.alt).toLocaleString()} <small style="font-size:9px;">FT</small>`;
+        if (data.isPaused !== undefined) {
+          isPausedRemote = data.isPaused;
+          updatePauseUI();
+        }
+        if (data.event === 'ring_hit' && 'vibrate' in navigator) {
+          navigator.vibrate([35, 30, 45]);
         }
       }
     }
 
-    // WebRTC PeerJS + Supabase Conduits
+    // Networking & Auto-Reconnect Watchdog
     function initConduits() {
       document.getElementById('status-text').textContent = 'PAIRING...';
       initWebRTC();
       initSupabase();
-      requestWakeLock();
       initSensors();
     }
 
@@ -1214,29 +930,22 @@
         peer = new Peer();
 
         peer.on('open', (id) => {
-          console.log('[PocketPad Aero] Local peer initialized:', id);
           connectToHostPeer();
         });
 
         peer.on('error', (err) => {
-          console.warn('[PocketPad Aero] PeerJS fallback to Supabase:', err);
+          scheduleReconnect();
         });
-      } catch (err) {
-        console.error('[PocketPad Aero] WebRTC init error:', err);
-      }
+      } catch(e) {}
     }
 
     function connectToHostPeer() {
       if (!peer || !roomCode) return;
       const hostPeerId = 'horizon-aero-' + roomCode;
-      console.log('[PocketPad Aero] Connecting to flight simulator host:', hostPeerId);
-
-      conn = peer.connect(hostPeerId, { reliable: false }); // Unreliable UDP mode for real-time 40Hz gyro
+      conn = peer.connect(hostPeerId, { reliable: false });
 
       conn.on('open', () => {
-        console.log('[PocketPad Aero] Direct WebRTC DataChannel OPEN!');
-        setConnected(true, 'WEBRTC P2P');
-        startPingHeartbeat();
+        setConnected(true, 'LINKED');
       });
 
       conn.on('data', (data) => {
@@ -1244,9 +953,19 @@
       });
 
       conn.on('close', () => {
-        console.log('[PocketPad Aero] WebRTC DataChannel closed');
-        if (isConnected) setConnected(false);
+        setConnected(false);
+        scheduleReconnect();
       });
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        if (!isConnected && peer && !peer.destroyed) {
+          connectToHostPeer();
+        }
+      }, 1800);
     }
 
     function initSupabase() {
@@ -1259,21 +978,11 @@
             .on('broadcast', { event: 'telemetry' }, (payload) => {
               if (payload.payload) handleIncomingData(payload.payload);
             })
-            .on('broadcast', { event: 'pong' }, () => {
-              const ping = Date.now() - lastPingTime;
-              document.getElementById('ping-text').textContent = 'PING: ' + ping + 'ms';
-            })
             .subscribe((status) => {
-              if (status === 'SUBSCRIBED' && !isConnected) {
-                console.log('[PocketPad Aero] Supabase channel subscribed');
-                setConnected(true, 'SUPABASE RELAY');
-                startPingHeartbeat();
-              }
+              if (status === 'SUBSCRIBED' && !isConnected) setConnected(true, 'RELAY');
             });
         }
-      } catch (err) {
-        console.error('[PocketPad Aero] Supabase init error:', err);
-      }
+      } catch(e) {}
     }
 
     function setConnected(connected, label = '') {
@@ -1284,27 +993,12 @@
       if (connected) {
         dot.classList.add('connected');
         text.textContent = label || 'LINKED';
-        triggerHaptic([30, 20, 40]);
       } else {
         dot.classList.remove('connected');
         text.textContent = 'DISCONNECTED';
       }
     }
 
-    function startPingHeartbeat() {
-      setInterval(() => {
-        if (isConnected) {
-          lastPingTime = Date.now();
-          if (conn && conn.open) {
-            conn.send({ type: 'ping' });
-          } else if (supabaseChannel) {
-            supabaseChannel.send({ type: 'broadcast', event: 'ping', payload: {} });
-          }
-        }
-      }, 2000);
-    }
-
-    // Startup Initialization
     window.addEventListener('DOMContentLoaded', () => {
       parseRoom();
       initThrottleTouch();
