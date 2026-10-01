@@ -589,12 +589,15 @@
           <span>🎯 CALIBRATE ZERO</span>
         </button>
         
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;" onclick="sendAction('camera_toggle')">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
+          <button id="btn-invert-phone" class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;font-size:10px;padding:8px 2px;" onclick="toggleInvertRemote()">
+            <span>🔄 INV</span>
+          </button>
+          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;font-size:10px;padding:8px 2px;" onclick="sendAction('camera_toggle')">
             <span>📷 CAM</span>
           </button>
-          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;" onclick="sendAction('level_wings')">
-            <span>⚖️ LEVEL</span>
+          <button class="action-tactile-btn" style="background:#1e293b;border:1px solid #475569;color:#fff;font-size:10px;padding:8px 2px;" onclick="sendAction('level_wings')">
+            <span>⚖️ LVL</span>
           </button>
         </div>
       </section>
@@ -618,6 +621,7 @@
     let supabaseChannel = null;
     let isConnected = false;
     let isPausedRemote = false;
+    let invertRollRemote = false;
     let reconnectTimer = null;
 
     // Neutral Trim Calibration
@@ -739,8 +743,13 @@
       currentPitch = Math.max(-1.0, Math.min(1.0, Math.sign(p) * Math.pow(Math.abs(p), 1.2)));
       currentRoll = Math.max(-1.0, Math.min(1.0, Math.sign(r) * Math.pow(Math.abs(r), 1.2)));
 
-      document.getElementById('roll-deg').textContent = (currentRoll * 35).toFixed(1) + '°';
-      document.getElementById('pitch-deg').textContent = (currentPitch * 25).toFixed(1) + '°';
+      const rollMag = Math.abs(currentRoll * 35).toFixed(1);
+      const rollDir = currentRoll > 0.05 ? 'R' : (currentRoll < -0.05 ? 'L' : 'CTR');
+      document.getElementById('roll-deg').textContent = `${rollMag}° ${rollDir}`;
+
+      const pitchMag = Math.abs(currentPitch * 25).toFixed(1);
+      const pitchDir = currentPitch > 0.05 ? 'DIVE' : (currentPitch < -0.05 ? 'CLIMB' : 'LVL');
+      document.getElementById('pitch-deg').textContent = `${pitchMag}° ${pitchDir}`;
     }
 
     function calibrateNeutral() {
@@ -831,6 +840,21 @@
       btn.innerHTML = isPausedRemote ? '<span>▶ RESUME</span>' : '<span>⏸ PAUSE</span>';
     }
 
+    function toggleInvertRemote() {
+      sendAction('toggle_invert_roll');
+      invertRollRemote = !invertRollRemote;
+      updateInvertUI();
+    }
+
+    function updateInvertUI() {
+      const btn = document.getElementById('btn-invert-phone');
+      if (btn) {
+        btn.innerHTML = invertRollRemote ? '<span>🔄 INV (ON)</span>' : '<span>🔄 INV</span>';
+        btn.style.color = invertRollRemote ? '#f59e0b' : '#fff';
+        btn.style.borderColor = invertRollRemote ? '#f59e0b' : '#475569';
+      }
+    }
+
     function sendAction(actionName) {
       if ('vibrate' in navigator) navigator.vibrate(20);
       sendData({ type: 'action', action: actionName, timestamp: Date.now() });
@@ -910,6 +934,10 @@
         if (data.isPaused !== undefined) {
           isPausedRemote = data.isPaused;
           updatePauseUI();
+        }
+        if (data.invertRoll !== undefined) {
+          invertRollRemote = data.invertRoll;
+          updateInvertUI();
         }
         if (data.event === 'ring_hit' && 'vibrate' in navigator) {
           navigator.vibrate([35, 30, 45]);
